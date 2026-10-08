@@ -5,6 +5,7 @@ import { apparentMag, AU_PER_PC, SUN_RADIUS_AU } from './physics.js';
 
 const NEAR_PC = 0.01; // stars closer than ~2,000 AU get drawn as discs with glare instead of points
 const STREAKS = 700;
+const MAX_PIXELS = 2560 * 1600;
 
 const STAR_VS = `
 attribute vec3 a_pos; attribute float a_mag; attribute vec3 a_col;
@@ -83,32 +84,49 @@ export class Sky {
   constructor(canvas, catalog, milkyway) {
     this.canvas = canvas;
     this.cat = catalog;
-    const gl = canvas.getContext('webgl', { antialias: true, alpha: false, preserveDrawingBuffer: true });
+    this.milkyway = milkyway;
+    const gl = canvas.getContext('webgl', { antialias: true, alpha: false });
     if (!gl) throw new Error('WebGL is not available');
     this.gl = gl;
-    this.maxPoint = gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE)[1];
     this.origin = [0, 0, 0];
+    this.lost = false;
 
+    const pairs = catalog.lines;
+    this.relPos = new Float32Array(catalog.count * 3);
+    this.linePos = new Float32Array(pairs.length * 6);
+    this.lineAlpha = new Float32Array(pairs.length * 2);
+    // How long each line is from Earth, so lines stretched by travel can fade out instead of slicing the sky.
+    this.lineSpan = pairs.map(([a, b]) => angle(catalog.pos, a, b, [0, 0, 0]));
+    // Warp streaks: dust in the ship's own frame, rushing past along the line of travel.
+    this.streaks = new Float32Array(STREAKS * 4);
+    this.streakVerts = new Float32Array(STREAKS * 8);
+    for (let i = 0; i < STREAKS; i++) this.respawn(i, -Math.random() * 40);
+
+    // If the graphics driver resets (a hang, a sleeping laptop), the browser takes the context away.
+    // Asking to keep it lets the browser hand it back, and then everything on the GPU is rebuilt.
+    canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); this.lost = true; this.onlost?.(); });
+    canvas.addEventListener('webglcontextrestored', () => { this.setup(); this.lost = false; this.onrestored?.(); });
+    this.setup();
+  }
+
+  // Everything that lives on the GPU: made at the start, and again after the context comes back.
+  setup() {
+    const { gl, cat } = this;
+    this.maxPoint = gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE)[1];
     this.starProg = program(gl, STAR_VS, STAR_FS);
     this.lineProg = program(gl, LINE_VS, LINE_FS);
     this.skyProg = program(gl, SKY_VS, SKY_FS);
     this.sunProg = program(gl, SUN_VS, SUN_FS);
     this.warpProg = program(gl, WARP_VS, WARP_FS);
 
-    const n = catalog.count;
-    this.relPos = new Float32Array(n * 3);
     this.posBuf = gl.createBuffer();
-    this.magBuf = buffer(gl, catalog.absmag);
-    this.colBuf = buffer(gl, catalog.color);
-    const pairs = catalog.lines;
-    this.linePos = new Float32Array(pairs.length * 6);
+    this.magBuf = buffer(gl, cat.absmag);
+    this.colBuf = buffer(gl, cat.color);
     this.lineBuf = gl.createBuffer();
-    this.lineAlpha = new Float32Array(pairs.length * 2);
-    this.lineAlphaBuf = gl.createBuffer();
-    // How long each line is from Earth, so lines stretched by travel can fade out instead of slicing the sky.
-    this.lineSpan = pairs.map(([a, b]) => angle(catalog.pos, a, b, [0, 0, 0]));
+    this.lineAlphaBuf = buffer(gl, this.lineAlpha, gl.DYNAMIC_DRAW);
     this.quad = buffer(gl, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]));
     this.tri = buffer(gl, new Float32Array([-1, -1, 3, -1, -1, 3]));
+    this.streakBuf = buffer(gl, this.streakVerts, gl.DYNAMIC_DRAW);
 
     this.tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, this.tex);
@@ -116,15 +134,9 @@ export class Sky {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, gl.LUMINANCE, gl.UNSIGNED_BYTE, milkyway);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.LUMINANCE, gl.LUMINANCE, gl.UNSIGNED_BYTE, this.milkyway);
 
-    // Warp streaks: dust in the ship's own frame, rushing past along the line of travel.
-    this.streaks = new Float32Array(STREAKS * 4);
-    this.streakVerts = new Float32Array(STREAKS * 8);
-    for (let i = 0; i < STREAKS; i++) this.respawn(i, -Math.random() * 40);
-    this.streakBuf = gl.createBuffer();
-
-    this.setOrigin([0, 0, 0]);
+    this.setOrigin(this.origin);
   }
 
   respawn(i, z) {
@@ -150,9 +162,12 @@ export class Sky {
     gl.bufferData(gl.ARRAY_BUFFER, this.linePos, gl.STATIC_DRAW);
   }
 
+  // Device pixels, up to twice the CSS size, and no more than about a 2560 x 1600 screen's worth in all.
   resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const w = Math.round(this.canvas.clientWidth * dpr), h = Math.round(this.canvas.clientHeight * dpr);
+    const cw = this.canvas.clientWidth, ch = this.canvas.clientHeight;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    dpr = Math.min(dpr, Math.sqrt(MAX_PIXELS / Math.max(cw * ch, 1)));
+    const w = Math.round(cw * dpr), h = Math.round(ch * dpr);
     if (this.canvas.width !== w || this.canvas.height !== h) { this.canvas.width = w; this.canvas.height = h; }
     this.dpr = dpr;
   }
@@ -175,6 +190,7 @@ export class Sky {
   }
 
   render(view) {
+    if (this.lost || this.gl.isContextLost()) return;
     this.resize();
     const { gl, cat } = this;
     const { width: W, height: H } = this.canvas;
@@ -223,7 +239,7 @@ export class Sky {
         this.lineAlpha[k * 2] = this.lineAlpha[k * 2 + 1] = fade;
       });
       gl.bindBuffer(gl.ARRAY_BUFFER, this.lineAlphaBuf);
-      gl.bufferData(gl.ARRAY_BUFFER, this.lineAlpha, gl.DYNAMIC_DRAW);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.lineAlpha);
       attr(gl, this.lineProg, 'a_alpha', this.lineAlphaBuf, 1);
       gl.drawArrays(gl.LINES, 0, cat.lines.length * 2);
       clearAttrs(gl);
@@ -299,7 +315,7 @@ export class Sky {
     gl.uniformMatrix4fv(this.warpProg.u.u_proj, false, proj);
     gl.uniform1f(this.warpProg.u.u_amount, view.warp);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.streakBuf);
-    gl.bufferData(gl.ARRAY_BUFFER, this.streakVerts, gl.DYNAMIC_DRAW);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.streakVerts);
     gl.enableVertexAttribArray(this.warpProg.a.a_p);
     gl.vertexAttribPointer(this.warpProg.a.a_p, 4, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.LINES, 0, STREAKS * 2);
@@ -393,10 +409,10 @@ function program(gl, vs, fs) {
   return { p, u, a };
 }
 
-function buffer(gl, data) {
+function buffer(gl, data, usage = gl.STATIC_DRAW) {
   const b = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, b);
-  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+  gl.bufferData(gl.ARRAY_BUFFER, data, usage);
   return b;
 }
 

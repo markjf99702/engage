@@ -65,6 +65,7 @@ async function start() {
     throw e;
   }
   sky.setOrigin(starPos(state.at));
+  watchGraphics();
   $('loading').remove();
   $('opt-lines').checked = state.opts.lines;
   $('opt-labels').checked = state.opts.labels;
@@ -89,14 +90,35 @@ function frame(now) {
   if (turn) steer(now);
   const pulsing = state.sunPulse && now - state.sunPulse < 2400;
   if (dirty || trip || turn || pulsing) {
-    sky.render({
-      cam: camAbs(), yaw: state.yaw, pitch: state.pitch, fov: state.fov, lines: state.opts.lines,
-      warp: trip?.warp || 0, warpSpeed: trip?.streak || 0, dt,
-    });
+    sky.render(viewNow(dt));
     drawLabels(now);
     dirty = false;
   }
   requestAnimationFrame(frame);
+}
+
+const viewNow = dt => ({
+  cam: camAbs(), yaw: state.yaw, pitch: state.pitch, fov: state.fov, lines: state.opts.lines,
+  warp: trip?.warp || 0, warpSpeed: trip?.streak || 0, dt,
+});
+
+// The graphics driver can reset under the page (a long freeze, waking a laptop). The browser usually hands the
+// viewscreen back on its own within a moment; if it doesn't, offer a reload instead of leaving a blank screen.
+let lostTimer = 0;
+function watchGraphics() {
+  const canvas = $('sky');
+  sky.onlost = () => {
+    canvas.style.visibility = 'hidden';
+    clearTimeout(lostTimer);
+    lostTimer = setTimeout(() => { $('lost').hidden = false; }, 2500);
+  };
+  sky.onrestored = () => {
+    clearTimeout(lostTimer);
+    canvas.style.visibility = '';
+    $('lost').hidden = true;
+    dirty = true;
+  };
+  $('lost-reload').addEventListener('click', () => location.reload());
 }
 
 let labelCandidates = null;
@@ -663,6 +685,8 @@ function hooks() {
       state.yaw = trip.yaw1; state.pitch = trip.pitch1; state.fov = 60 * DEG;
     },
     redraw() { dirty = true; },
+    // Draws now and returns the viewscreen as an image (the drawing buffer is cleared once it's on screen).
+    snapshot() { sky.render(viewNow(0)); return $('sky').toDataURL('image/png'); },
     closeSheets,
   };
 }

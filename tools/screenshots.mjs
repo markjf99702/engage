@@ -69,7 +69,7 @@ async function open(viewport, deviceScaleFactor) {
   const page = await open({ width: 640, height: 630 }, 1);
   await page.evaluate(() => { engage.state.opts.labels = false; engage.freeze('Rigil Kentaurus', 0.36); });
   await page.waitForTimeout(700);
-  const shot = await page.evaluate(() => document.getElementById('sky').toDataURL('image/png'));
+  const shot = await page.evaluate(() => engage.snapshot());
   await page.context().close();
 
   const font = async f => (await readFile(join(root, 'fonts', f))).toString('base64');

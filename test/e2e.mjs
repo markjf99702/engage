@@ -88,6 +88,41 @@ assert.equal(await shown('#intro'), false);
 // Fits a phone: nothing scrolls sideways.
 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'the page scrolls sideways on a phone');
 
+// If the graphics reset mid-flight, the viewscreen comes back instead of staying blank.
+const brightness = async () => {
+  const png = (await page.screenshot({ clip: { x: 20, y: 160, width: 350, height: 200 } })).toString('base64');
+  return page.evaluate(async src => {
+    const img = new Image(); img.src = 'data:image/png;base64,' + src; await img.decode();
+    const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+    const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    let sum = 0; for (let i = 0; i < d.length; i += 4) sum += d[i] + d[i + 1] + d[i + 2];
+    return sum / (d.length / 4) / 3;
+  }, png);
+};
+const loseGraphics = () => page.evaluate(() => { window.__gl = document.getElementById('sky').getContext('webgl').getExtension('WEBGL_lose_context'); __gl.loseContext(); });
+await page.evaluate(() => { engage.speed(4); engage.target('Wolf 359'); });
+await page.click('#engage');
+await page.waitForTimeout(1500);
+await loseGraphics();
+await page.waitForTimeout(300);
+await page.evaluate(() => __gl.restoreContext());
+await page.waitForFunction(() => !document.getElementById('arrival').hidden, null, { timeout: 20000 });
+await page.evaluate(() => engage.closeSheets());
+await page.waitForTimeout(300);
+assert.equal(await text('#where'), 'Wolf 359');
+assert.ok(await brightness() < 40, 'the viewscreen stayed blank after the graphics came back');
+assert.equal(await shown('#lost'), false);
+
+// If they never come back, it offers a restart.
+await loseGraphics();
+await page.waitForTimeout(3000);
+assert.ok(await shown('#lost'), 'no way out of a blank viewscreen');
+await Promise.all([page.waitForNavigation(), page.click('#lost-reload')]);
+await page.waitForFunction(() => window.engage);
+assert.equal(await text('#where'), 'Wolf 359');
+assert.equal(await shown('#lost'), false);
+
 // Works offline once it has been opened.
 await page.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 10000 }).catch(() => {});
 await ctx.setOffline(true);
