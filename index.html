@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Engage</title>
+  <meta name="description" content="Take the helm of a starship and warp to real stars. The sky on the viewscreen is drawn from a real star catalogue, so constellations shift as you travel, and the captain’s log tells you what you’d find when you arrive.">
+  <meta property="og:title" content="Engage">
+  <meta property="og:description" content="Set course for a real star, pick a warp factor and go.">
+  <meta property="og:image" content="https://junkdrawer.works/engage/og.png">
+  <meta property="og:url" content="https://junkdrawer.works/engage/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#05070d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preload" href="fonts/chakra-petch-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="data/stars.bin" as="fetch" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <noscript><p class="noscript">Engage needs JavaScript to draw the stars and fly the ship.</p></noscript>
+
+  <main id="bridge" aria-label="Bridge">
+    <canvas id="sky" aria-hidden="true"></canvas>
+    <canvas id="labels" aria-label="Viewscreen. Drag to look around, pinch or scroll to zoom, tap a star to choose it."></canvas>
+    <div id="flash" aria-hidden="true"></div>
+
+    <header class="hud">
+      <div class="where">
+        <p class="eyebrow" id="status">Holding</p>
+        <h1 id="where">Earth orbit</h1>
+        <p class="sub" id="when"></p>
+      </div>
+      <div class="hud-buttons">
+        <button class="round" id="look-home" type="button" title="Look toward the Sun" aria-label="Look toward the Sun">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><circle cx="12" cy="12" r="9" class="ring"/></svg>
+        </button>
+        <button class="round" id="open-log" type="button" title="Captain’s log" aria-label="Captain’s log">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h10.5a1.5 1.5 0 0 1 1.5 1.5v15H7.5A1.5 1.5 0 0 1 6 18.5zM6 18.5A1.5 1.5 0 0 1 7.5 17H18M9.5 8h5M9.5 11h5"/></svg>
+        </button>
+        <button class="round" id="open-settings" type="button" title="Settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="readout" id="readout" hidden>
+      <span id="readout-warp">Warp 9</span>
+      <span id="readout-left"></span>
+      <span id="readout-time"></span>
+    </div>
+
+    <section class="console" id="console" aria-label="Helm">
+      <button class="target" id="choose" type="button">
+        <span class="eyebrow">Destination</span>
+        <span class="target-name" id="target-name">Choose a star</span>
+        <span class="target-sub" id="target-sub">Tap a star on the viewscreen, or pick from the list</span>
+        <svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <p class="trip" id="trip"></p>
+      <div class="helm">
+        <label class="warp">
+          <span class="warp-label">Warp <output id="warp-out" for="warp">9</output></span>
+          <input type="range" id="warp" min="1" max="9.9" step="0.1" value="9" aria-describedby="warp-speed">
+          <span class="warp-speed" id="warp-speed">1,516 × light</span>
+        </label>
+        <button class="engage" id="engage" type="button" disabled>Engage</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <section class="sheet" id="picker" hidden aria-label="Choose a destination">
+    <div class="sheet-head">
+      <h2>Set course</h2>
+      <button class="close" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <input class="search" id="search" type="search" placeholder="Search 18,000 stars" autocomplete="off" spellcheck="false" aria-label="Search stars">
+    <div class="list" id="list"></div>
+  </section>
+
+  <section class="sheet" id="log" hidden aria-label="Captain’s log">
+    <div class="sheet-head">
+      <h2>Captain’s log</h2>
+      <button class="close" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="stats" id="stats"></p>
+    <div class="entries" id="entries"></div>
+    <footer class="jd-foot">
+      <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+      <span aria-hidden="true">·</span>
+      <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+    </footer>
+  </section>
+
+  <section class="sheet" id="settings" hidden aria-label="Settings">
+    <div class="sheet-head">
+      <h2>Bridge settings</h2>
+      <button class="close" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="opt-lines" checked> <span>Constellation lines</span></label>
+    <label class="toggle"><input type="checkbox" id="opt-labels" checked> <span>Star names</span></label>
+    <label class="toggle"><input type="checkbox" id="opt-sound" checked> <span>Engine sound</span></label>
+    <div class="about">
+      <h3>What you’re seeing</h3>
+      <p>Every star is real and in its real place: about 18,000 of them, everything you could see from Earth with your eyes plus every catalogued star within 80 light years. As the ship moves, each one is redrawn as bright as it would look from where you are, so nearby stars slide across the sky and constellations come apart.</p>
+      <p>Warp speeds follow the scale where warp 9 is about 1,500 times the speed of light. The trip times are what that would take; the flight is shortened so you don’t have to wait a day.</p>
+      <p>Star data: the HYG database by David Nash (CC BY-SA 4.0), built from the Hipparcos, Yale Bright Star and Gliese catalogues. Constellation lines and the Milky Way: d3-celestial by Olaf Frohn.</p>
+      <button class="text-button" id="clear-log" type="button">Clear the log and return to Earth</button>
+    </div>
+    <footer class="jd-foot">
+      <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+      <span aria-hidden="true">·</span>
+      <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+    </footer>
+  </section>
+
+  <section class="sheet arrival" id="arrival" hidden aria-label="Log entry">
+    <div class="sheet-head">
+      <p class="eyebrow" id="arrival-date"></p>
+      <button class="close" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <article class="entry" id="arrival-entry"></article>
+    <div class="arrival-actions">
+      <button class="secondary" id="arrival-home" type="button">Look for the Sun</button>
+      <button class="primary" id="arrival-next" type="button">Next destination</button>
+    </div>
+  </section>
+
+  <section class="intro" id="intro" hidden aria-label="Welcome">
+    <div class="intro-card">
+      <p class="eyebrow">Bridge</p>
+      <h2>Engage</h2>
+      <p>You’re on the bridge, holding in Earth’s orbit. Choose a star, set your warp factor, and go.</p>
+      <p>Every star out there is real and in its real place, so the sky changes the way it truly would as you travel. When you arrive, the log tells you what you’ve found.</p>
+      <button class="primary" id="intro-go" type="button">Take the helm</button>
+      <footer class="jd-foot">
+        <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+      </footer>
+    </div>
+  </section>
+
+  <p class="loading" id="loading">Charting 18,000 stars…</p>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

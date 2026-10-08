@@ -1,0 +1,9 @@
+{
+  "name": "engage",
+  "private": true,
+  "type": "module",
+  "description": "Set course for a real star, pick a warp factor and go.",
+  "scripts": {
+    "test": "node --test test/physics.test.mjs && node test/e2e.mjs"
+  }
+}
