@@ -548,8 +548,17 @@ function bind() {
       dirty = true;
     });
   }
-  $('clear-log').addEventListener('click', () => {
-    if (!confirm('Clear the captain’s log and go back to Earth?')) return;
+  // Two taps, asked on the button itself (the Artifact viewer refuses confirm dialogs).
+  $('clear-log').addEventListener('click', e => {
+    const b = e.currentTarget;
+    if (!b.dataset.armed) {
+      b.dataset.armed = '1';
+      b.textContent = 'Tap again to clear the log';
+      setTimeout(() => { delete b.dataset.armed; b.textContent = 'Clear the log and return to Earth'; }, 4000);
+      return;
+    }
+    delete b.dataset.armed;
+    b.textContent = 'Clear the log and return to Earth';
     const keep = { opts: state.opts, seenIntro: true, warp: state.warp };
     Object.assign(state, defaults(), keep);
     sky.setOrigin(starPos(0));
