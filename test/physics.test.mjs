@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { warpSpeed, apparentMag, formatDuration, formatLy, formatYear, tripYears, voyagerYears, physical, holdDistanceAU } from '../js/physics.js';
 import { describeKind, homeLines, composeEntry } from '../js/log.js';
 import { DESTINATIONS } from '../js/destinations.js';
+import { CLASSES } from '../js/classes.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 // loadCatalog fetches relative URLs; answer them from the repo.
@@ -81,4 +82,26 @@ test('the offline copy lists every script', async () => {
   const sw = await readFile(join(root, 'sw.js'), 'utf8');
   for (const f of await readdir(join(root, 'js'))) assert.ok(sw.includes(`'js/${f}'`), f);
   for (const f of await readdir(join(root, 'fonts'))) if (f.endsWith('.woff2')) assert.ok(sw.includes(`'fonts/${f}'`), f);
+});
+
+test('every survey world Engage can fly to is in the catalogue', () => {
+  for (const c of CLASSES) {
+    for (const w of c.worlds) {
+      if (!w.star) continue;
+      const i = cat.byName.get(w.star);
+      assert.ok(i !== undefined, `${w.name}: no star called ${w.star}`);
+      const ly = Math.hypot(...at(w.star)) * 3.26156;
+      assert.ok(Math.abs(ly - w.ly) / w.ly < 0.1, `${w.name}: file says ${w.ly} ly, catalogue says ${ly.toFixed(1)}`);
+    }
+  }
+});
+
+test('survey files are complete', () => {
+  const ids = new Set();
+  for (const c of CLASSES) {
+    assert.ok(!ids.has(c.id), `two files called ${c.id}`);
+    ids.add(c.id);
+    for (const k of ['name', 'short', 'art', 'real', 'about', 'tell', 'home']) assert.ok(c[k], `${c.id} has no ${k}`);
+    for (const k of ['width', 'mass', 'temp']) assert.ok(c.typical[k][0] < c.typical[k][1], `${c.id}: ${k} range is backwards`);
+  }
 });

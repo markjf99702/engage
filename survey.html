@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Planetary survey · Engage</title>
+  <meta name="description" content="Flip through Starfleet’s planet classes, from Class M to Demon class, next to the kinds of planet astronomers have really found, with real worlds you can set course for in Engage.">
+  <meta property="og:title" content="Planetary survey">
+  <meta property="og:description" content="Starfleet’s planet classes next to the real planets astronomers have found.">
+  <meta property="og:image" content="https://junkdrawer.works/engage/og-survey.png">
+  <meta property="og:url" content="https://junkdrawer.works/engage/survey.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#05070d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preload" href="fonts/chakra-petch-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/survey.css">
+</head>
+<body class="survey">
+  <noscript><p class="noscript">The planetary survey needs JavaScript to draw the planets.</p></noscript>
+
+  <header class="top">
+    <a class="back" href="./" aria-label="Back to the bridge">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      <span>Bridge</span>
+    </a>
+    <div class="title">
+      <p class="eyebrow">Engage · Science station</p>
+      <h1>Planetary survey</h1>
+    </div>
+    <nav class="tabs" aria-label="Mode">
+      <button type="button" data-mode="files" aria-pressed="true">Survey files</button>
+      <button type="button" data-mode="drill" aria-pressed="false">Cover your tracks</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="files" aria-label="Survey files">
+      <div class="viewer" id="viewer">
+        <canvas class="globe" id="globe" aria-hidden="true"></canvas>
+        <div class="badge" id="badge"></div>
+        <button class="flip prev" id="prev" type="button" aria-label="Previous file">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <button class="flip next" id="next" type="button" aria-label="Next file">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <p class="counter" id="counter"></p>
+      </div>
+      <div class="strip-wrap">
+        <div class="strip" id="strip" role="list"></div>
+      </div>
+      <article class="file" id="file" aria-live="polite"></article>
+    </section>
+
+    <section id="drill" hidden aria-label="Cover your tracks">
+      <div class="drill-intro" id="drill-intro">
+        <p>Your ship has found a world nobody is supposed to know about. Before the survey is filed, swap its record for an ordinary one: pick the class whose file it would pass for.</p>
+      </div>
+      <div class="drill-grid">
+        <div class="viewer small">
+          <canvas class="globe" id="drill-globe" aria-hidden="true"></canvas>
+          <p class="tag" id="drill-tag"></p>
+        </div>
+        <div class="sensor">
+          <p class="eyebrow">Sensor log</p>
+          <dl id="readings"></dl>
+        </div>
+      </div>
+      <p class="prompt" id="prompt">Which file would it pass for?</p>
+      <div class="choices" id="choices"></div>
+      <div class="verdict" id="verdict" hidden>
+        <p class="verdict-head" id="verdict-head"></p>
+        <p id="verdict-text"></p>
+        <div class="verdict-actions">
+          <a class="secondary" id="verdict-file" href="#">Read the file</a>
+          <button class="primary" id="drill-next" type="button">Next world</button>
+        </div>
+      </div>
+      <p class="score" id="score"></p>
+    </section>
+  </main>
+
+  <footer class="jd-foot">
+    <a href="./">Engage</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+  </footer>
+
+  <script type="module" src="js/survey.js"></script>
+</body>
+</html>
