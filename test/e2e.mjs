@@ -69,6 +69,7 @@ const entry = await text('#arrival-entry');
 assert.match(entry, /Proxima b’s orbit/);
 assert.match(entry, /Cassiopeia/, 'the log does not say where the Sun is');
 assert.match(entry, /in 1 day at warp 9/);
+assert.match(entry, /Proxima b: Class M candidate/, 'the log does not link to the planetary survey');
 assert.equal(await text('#where'), 'Proxima Centauri');
 
 // Looking for the Sun turns the view toward it.
@@ -122,6 +123,47 @@ await Promise.all([page.waitForNavigation(), page.click('#lost-reload')]);
 await page.waitForFunction(() => window.engage);
 assert.equal(await text('#where'), 'Wolf 359');
 assert.equal(await shown('#lost'), false);
+
+// The planetary survey: flip through the files, set course from one, and play the drill.
+await page.goto(base + 'survey.html#K');
+await page.waitForFunction(() => window.survey);
+assert.match(await text('#file h2'), /Class K/);
+await page.click('#next');
+assert.match(await text('#file h2'), /Class H/);
+assert.equal(new URL(page.url()).hash, '#H');
+await page.locator('#strip .chip').nth(0).click();
+assert.match(await text('#file h2'), /Class M/);
+assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'the survey scrolls sideways on a phone');
+await page.waitForTimeout(1500); // the sharp map paints in the background
+const lit = await page.evaluate(() => {
+  const c = document.getElementById('globe'), g = c.getContext('2d');
+  const d = g.getImageData(c.width * 0.35, c.height * 0.35, c.width * 0.3, c.height * 0.3).data;
+  let s = 0; for (let i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2];
+  return s / (d.length / 4) / 3;
+});
+assert.ok(lit > 40, 'the planet is not drawn');
+await Promise.all([page.waitForNavigation(), page.locator('#file .fly').first().click()]);
+await page.waitForFunction(() => window.engage);
+assert.equal(await text('#target-name'), 'Proxima Centauri', 'set course did not choose the star');
+assert.equal(new URL(page.url()).search, '', 'the course link stayed in the address');
+
+await page.goto(base + 'survey.html#drill');
+await page.waitForFunction(() => window.survey?.world);
+let world = await page.evaluate(() => survey.world.cls.id);
+await page.click(`#choices [data-id="${world}"]`);
+assert.match(await text('#verdict-head'), /Record filed/);
+assert.match(await text('#score'), /streak 1/i);
+await page.click('#drill-next');
+world = await page.evaluate(() => survey.world.cls.id);
+const wrong = await page.evaluate(() => survey.world.choices.find(c => c.id !== survey.world.cls.id).id);
+await page.click(`#choices [data-id="${wrong}"]`);
+assert.match(await text('#verdict-head'), /wouldn’t fool anyone/);
+assert.match(await text('#score'), /streak 0 · best 1/i);
+await page.click('#verdict-file');
+assert.equal(await shown('#files'), true, 'reading the file did not open it');
+assert.equal(await page.evaluate(() => location.hash.slice(1)), world);
+await page.goto(base);
+await page.waitForFunction(() => window.engage);
 
 // Works offline once it has been opened.
 await page.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 10000 }).catch(() => {});

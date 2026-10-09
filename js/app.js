@@ -4,11 +4,15 @@ import { Sky } from './sky.js';
 import { sound } from './audio.js';
 import { DESTINATIONS, GROUPS } from './destinations.js';
 import { composeEntry, describeKind, notesFor, titleFor } from './log.js';
+import { filesForStar, label as classLabel } from './classes.js';
 import {
   AU_PER_PC, LY_PER_PC, apparentMag, formatDuration, formatLy, holdDistanceAU, stardate, tripYears, warpSpeed,
 } from './physics.js';
 
 const KEY = 'engage.v1';
+// The planetary survey page. The single-file copy points this at the live site.
+const SURVEY = 'survey.html';
+const AWAY = SURVEY.startsWith('http') ? ' target="_blank" rel="noopener"' : '';
 const $ = id => document.getElementById(id);
 const DEG = Math.PI / 180;
 const START_YAW = 83 * DEG, START_PITCH = 3 * DEG; // facing Orion, with the Sun behind
@@ -73,12 +77,22 @@ async function start() {
   $('warp').value = state.warp;
   updateWarp();
   setTarget(state.target, false);
+  courseFromLink();
   updateHud();
   if (!state.seenIntro) $('intro').hidden = false;
   bind();
   requestAnimationFrame(frame);
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
   window.engage = hooks();
+}
+
+// A link like ?course=Proxima%20Centauri, from the planetary survey, sets course for that star.
+function courseFromLink() {
+  const name = new URLSearchParams(location.search).get('course');
+  if (name == null) return;
+  const i = cat.byName.get(name);
+  if (i !== undefined) setTarget(i);
+  history.replaceState(null, '', location.pathname + location.hash);
 }
 
 // ---------- Drawing ----------
@@ -467,9 +481,18 @@ function entryHtml(e, heading) {
     const style = heading ? ` style="animation: rise .5s ${(delay += 0.12).toFixed(2)}s both"` : '';
     if (label) parts.push(`<dt${style}>${esc(label)}</dt>`);
     parts.push(`<dd class="${label ? (label === 'Looking home' ? 'home' : '') : 'note'}"${style}>${esc(text)}</dd>`);
+    if (label === 'Planets') parts.push(surveyLinks(e.star, style));
   }
   parts.push('</dl>');
   return parts.join('');
+}
+
+// Links to the planetary survey's files on this star's planets.
+function surveyLinks(i, style) {
+  const files = filesForStar(cat.names[i]);
+  if (!files.length) return '';
+  return `<dd class="files"${style}>${files.map(({ world, cls }) =>
+    `<a href="${SURVEY}#${encodeURIComponent(cls.id)}"${AWAY}>${esc(world.name)}: ${esc(classLabel(cls))}${cls.candidate ? ' candidate' : ''}</a>`).join('')}</dd>`;
 }
 
 function renderLog() {
