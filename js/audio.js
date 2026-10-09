@@ -99,6 +99,102 @@ export const sound = {
     hum = null;
   },
 
+  // For the Kobayashi Maru: weapons, hits and the red alert.
+  phaser() {
+    if (!this.on || !ensure()) return;
+    ctx.resume();
+    const t = ctx.currentTime, o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sawtooth'; o2.type = 'square';
+    o.frequency.setValueAtTime(1400, t); o.frequency.exponentialRampToValueAtTime(700, t + 0.5);
+    o2.frequency.setValueAtTime(1407, t); o2.frequency.exponentialRampToValueAtTime(690, t + 0.5);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.06, t + 0.03);
+    g.gain.setValueAtTime(0.06, t + 0.45);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+    o.connect(lp); o2.connect(lp); lp.connect(g).connect(master);
+    for (const x of [o, o2]) { x.start(t); x.stop(t + 0.62); }
+  },
+
+  torpedo() {
+    if (!this.on || !ensure()) return;
+    ctx.resume();
+    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(320, t); o.frequency.exponentialRampToValueAtTime(90, t + 0.35);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+    o.connect(g).connect(master);
+    o.start(t); o.stop(t + 0.42);
+  },
+
+  boom(big = false) {
+    if (!this.on || !ensure()) return;
+    ctx.resume();
+    const t = ctx.currentTime, len = big ? 2.4 : 1.1;
+    const n = noise(len), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(big ? 1800 : 1200, t);
+    lp.frequency.exponentialRampToValueAtTime(60, t + len);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(big ? 0.9 : 0.5, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    n.connect(lp).connect(g).connect(master);
+    n.start(t); n.stop(t + len + 0.05);
+  },
+
+  // A short hit on the hull: a thud with some rattle.
+  thud() {
+    if (!this.on || !ensure()) return;
+    ctx.resume();
+    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.3);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.4, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+    o.connect(g).connect(master);
+    o.start(t); o.stop(t + 0.4);
+  },
+
+  // Red alert: two rising whoops.
+  alert() {
+    if (!this.on || !ensure()) return;
+    ctx.resume();
+    const t0 = ctx.currentTime;
+    for (let i = 0; i < 2; i++) {
+      const t = t0 + i * 0.55, o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'square';
+      o.frequency.setValueAtTime(380, t); o.frequency.exponentialRampToValueAtTime(760, t + 0.4);
+      const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.07, t + 0.04);
+      g.gain.setValueAtTime(0.07, t + 0.38);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.48);
+      o.connect(lp).connect(g).connect(master);
+      o.start(t); o.stop(t + 0.5);
+    }
+  },
+
+  // The transporter: a shimmer of high tones.
+  beam() {
+    if (!this.on || !ensure()) return;
+    ctx.resume();
+    const t = ctx.currentTime;
+    for (const [f, d] of [[1760, 0], [2217, 0.05], [2637, 0.1], [3520, 0.15]]) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f, t + d);
+      o.frequency.linearRampToValueAtTime(f * 1.02, t + d + 1.1);
+      g.gain.setValueAtTime(0.0001, t + d);
+      g.gain.exponentialRampToValueAtTime(0.025, t + d + 0.2);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + d + 1.2);
+      o.connect(g).connect(master);
+      o.start(t + d); o.stop(t + d + 1.25);
+    }
+  },
+
   stop() {
     if (hum && ctx) {
       const t = ctx.currentTime;

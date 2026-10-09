@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kobayashi Maru · Engage</title>
+  <meta name="description" content="Starfleet Academy’s no-win test, on Engage’s bridge. Rescue the Kobayashi Maru from inside the Klingon Neutral Zone, one order at a time. You can’t win, so you’re graded on how you lose.">
+  <meta property="og:title" content="Kobayashi Maru">
+  <meta property="og:description" content="Starfleet’s no-win test. You can’t save everyone, so you’re graded on how you lose.">
+  <meta property="og:image" content="https://junkdrawer.works/engage/og-maru.png">
+  <meta property="og:url" content="https://junkdrawer.works/engage/maru.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#05070d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preload" href="fonts/chakra-petch-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/maru.css">
+</head>
+<body class="maru">
+  <noscript><p class="noscript">The Kobayashi Maru needs JavaScript to run the simulation.</p></noscript>
+
+  <header class="top">
+    <a class="back" href="./" aria-label="Back to the bridge">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      <span>Bridge</span>
+    </a>
+    <div class="title">
+      <p class="eyebrow">Engage · Starfleet Academy</p>
+      <h1>Kobayashi Maru</h1>
+    </div>
+  </header>
+
+  <main>
+    <section id="brief" aria-label="Briefing">
+      <div class="card brief">
+        <p class="eyebrow">Command training · Simulation</p>
+        <h2>The no-win scenario</h2>
+        <p>You command a starship on the edge of the Klingon Neutral Zone. A distress call comes in: the fuel carrier <i>Kobayashi Maru</i> has struck a mine inside the zone. 381 people are aboard, and her life support is failing.</p>
+        <p>Going in breaks the treaty with the Klingon Empire. Staying out leaves them to die.</p>
+        <p>Every cadet takes this test, and nobody beats it. The examiners grade how you lose.</p>
+        <p class="how">Each turn you give one order, and the simulation answers.</p>
+        <button class="primary" id="start" type="button">Take command</button>
+        <button class="text-button" id="rewrite" type="button" hidden>Reprogram the simulator</button>
+      </div>
+      <div class="card record" id="record" hidden>
+        <p class="eyebrow">Your record</p>
+        <ol id="runs"></ol>
+      </div>
+    </section>
+
+    <section id="sim" hidden aria-label="Simulation">
+      <div class="plot-wrap">
+        <canvas id="plot" aria-label="Tactical display"></canvas>
+        <p class="turn" id="turn"></p>
+        <p class="alert" id="alert" hidden>Red alert</p>
+        <p class="caption" id="caption" aria-hidden="true"></p>
+      </div>
+      <div class="side">
+        <div class="status" id="status">
+          <div class="gauge"><span class="g-k">Hull</span><span class="g-v" id="hull"></span><span class="bar"><i id="hull-bar"></i></span></div>
+          <div class="gauge"><span class="g-k">Shields</span><span class="g-v" id="shields"></span><span class="bar"><i id="shields-bar"></i></span></div>
+          <div class="gauge"><span class="g-k">Aboard the Maru</span><span class="g-v" id="maru-left"></span></div>
+          <div class="gauge"><span class="g-k">Rescued</span><span class="g-v" id="rescued"></span></div>
+        </div>
+        <div class="orders" id="orders" aria-label="Orders"></div>
+      </div>
+      <div class="comms" id="comms" role="log" aria-live="polite" aria-label="Communications"></div>
+    </section>
+
+    <section id="eval" hidden aria-label="Evaluation">
+      <div class="card evaluation">
+        <p class="eyebrow">Starfleet Academy · Evaluation</p>
+        <h2 id="eval-title"></h2>
+        <p class="summary" id="eval-summary"></p>
+        <div class="grades" id="grades"></div>
+        <h3>Examiner’s notes</h3>
+        <div id="eval-note"></div>
+        <p class="moral">The Kobayashi Maru has no winning answer. It shows the examiners how you face one.</p>
+        <div class="eval-actions">
+          <a class="secondary" id="to-bridge" href="./">Back to the bridge</a>
+          <button class="primary" id="again" type="button">Run it again</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="jd-foot">
+    <a href="./">Engage</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+  </footer>
+
+  <script type="module" src="js/maru.js"></script>
+</body>
+</html>

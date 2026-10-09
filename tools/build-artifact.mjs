@@ -1,5 +1,5 @@
 // Bundles the whole app into one HTML file for the Artifact viewer:  node tools/build-artifact.mjs
-// Writes dist/engage.html and dist/survey.html: styles, fonts, scripts, star data and the Milky Way all inline, with no document wrapper
+// Writes dist/engage.html, dist/survey.html and dist/maru.html: styles, fonts, scripts, star data and the Milky Way all inline, with no document wrapper
 // (the viewer adds its own). The site itself still runs from the repo as-is; this is only for the playable copy.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
@@ -58,7 +58,8 @@ window.fetch = async url => {
 `;
 
 const title = html.match(/<title>.*?<\/title>/)[0];
-const body = pageBody(html).replaceAll('href="survey.html"', `href="${LIVE}survey.html" target="_blank" rel="noopener"`);
+const body = pageBody(html).replaceAll('href="survey.html"', `href="${LIVE}survey.html" target="_blank" rel="noopener"`)
+  .replaceAll('href="maru.html"', `href="${LIVE}maru.html" target="_blank" rel="noopener"`);
 const out = `${title}
 <meta name="theme-color" content="#05070d">
 <style>
@@ -96,3 +97,24 @@ ${surveyJs}
 `;
 await writeFile(join(root, 'dist/survey.html'), surveyOut);
 console.log(`dist/survey.html: ${(surveyOut.length / 1024).toFixed(0)} KB`);
+
+// The Kobayashi Maru, as its own single file. Links back to the bridge go to the live site.
+const maruHtml = await read('maru.html');
+const maruJs = await bundle(['audio', 'maru-sim', 'maru']);
+const maruOut = `<title>Kobayashi Maru</title>
+<meta name="theme-color" content="#05070d">
+<style>
+${css}
+${await read('css/maru.css')}
+</style>
+<div class="maru-root">
+${pageBody(maruHtml).replaceAll('href="./"', `href="${LIVE}" target="_blank" rel="noopener"`)}
+</div>
+<script type="module">
+const __m = {};
+document.body.classList.add('maru');
+${maruJs}
+</script>
+`;
+await writeFile(join(root, 'dist/maru.html'), maruOut);
+console.log(`dist/maru.html: ${(maruOut.length / 1024).toFixed(0)} KB`);

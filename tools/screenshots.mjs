@@ -1,5 +1,5 @@
-// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png):  node tools/screenshots.mjs
-// Only the planetary survey's:  node tools/screenshots.mjs survey
+// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png):  node tools/screenshots.mjs
+// Only the planetary survey's, or the Kobayashi Maru's:  node tools/screenshots.mjs survey  (or maru)
 // Math.random is seeded, so the warp streaks come out the same each time.
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
@@ -96,7 +96,7 @@ if (!only) {
 }
 
 // The planetary survey: a phone screenshot for the README, and its link preview with a row of planets.
-{
+if (!only || only === 'survey') {
   const page = await open({ width: 390, height: 844 }, 2);
   await page.goto(base + 'survey.html#O');
   await page.waitForFunction(() => window.survey);
@@ -129,6 +129,54 @@ if (!only) {
   <img src="${planets[4]}" style="left:560px; top:120px; width:150px">`);
   await card.waitForTimeout(300);
   await card.screenshot({ path: join(root, 'og-survey.png') });
+  await card.context().close();
+}
+
+// The Kobayashi Maru: a phone screenshot mid-battle for the README, and its link preview with the tactical display.
+if (!only || only === 'maru') {
+  const play = async (page, plan) => {
+    for (const id of plan) {
+      await page.click(`.order[data-id="${id}"]`);
+      await page.waitForFunction(() => !maru.busy, null, { timeout: 20000 });
+    }
+  };
+  const page = await open({ width: 390, height: 844 }, 2);
+  await page.goto(base + 'maru.html');
+  await page.waitForFunction(() => window.maru);
+  await page.click('#start');
+  await play(page, ['hail-maru', 'enter', 'beam', 'beam']);
+  await page.click('.order[data-id="phasers"]');
+  await page.waitForTimeout(450);
+  await page.screenshot({ path: join(root, 'docs/phone-maru.png') });
+  await page.context().close();
+
+  const wide = await open({ width: 700, height: 900 }, 1);
+  await wide.goto(base + 'maru.html');
+  await wide.waitForFunction(() => window.maru);
+  await wide.click('#start');
+  await play(wide, ['enter', 'beam', 'torpedoes']);
+  await wide.waitForTimeout(400);
+  const shot = await wide.evaluate(() => document.getElementById('plot').toDataURL());
+  await wide.context().close();
+
+  const font = async f => (await readFile(join(root, 'fonts', f))).toString('base64');
+  const card = await open({ width: 1200, height: 630 }, 1);
+  await card.setContent(`<!doctype html><style>
+    @font-face { font-family: C; font-weight: 600; src: url(data:font/woff2;base64,${await font('chakra-petch-600.woff2')}); }
+    @font-face { font-family: P; src: url(data:font/woff2;base64,${await font('ibm-plex-sans.woff2')}); }
+    body { margin: 0; width: 1200px; height: 630px; background: radial-gradient(ellipse at 20% 0%, #3a0f14, #05070d 65%); color: #e8edf6; overflow: hidden; position: relative; }
+    .text { position: absolute; left: 72px; top: 0; bottom: 0; width: 520px; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
+    .eyebrow { font: 600 22px C; letter-spacing: .18em; text-transform: uppercase; color: #ff6b5e; }
+    h1 { margin: 10px 0 18px; font: 600 80px/1 C; letter-spacing: .03em; }
+    p { margin: 0; font: 32px/1.3 P; color: #cdd5e3; max-width: 470px; }
+    .meta { margin-top: 30px; font: 600 22px C; letter-spacing: .08em; color: #ffb54a; }
+    .view { position: absolute; right: 0; top: 0; width: 640px; height: 630px; background: url(${shot}) 70% center / cover; }
+    .view::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #05070d 0%, rgba(5,7,13,0) 35%); }
+  </style>
+  <div class="view"></div>
+  <div class="text"><div class="eyebrow">Starfleet Academy</div><h1>Kobayashi Maru</h1><p>The no-win test. You can’t save everyone, so you’re graded on how you lose.</p><div class="meta">One order a turn</div></div>`);
+  await card.waitForTimeout(300);
+  await card.screenshot({ path: join(root, 'og-maru.png') });
   await card.context().close();
 }
 
