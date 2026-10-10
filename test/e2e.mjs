@@ -197,6 +197,34 @@ for (let i = 0; i < 6; i++) await order('beam');
 await order('warp');
 await page.click('#read-eval');
 assert.equal(await text('#eval-title'), 'Changed the rules');
+// Long missions: reached from the bridge, the ships on file, a hail sent, and a course set for where one is bound.
+await page.goto(base);
+await page.waitForFunction(() => window.engage);
+await Promise.all([page.waitForNavigation(), page.click('#open-missions')]);
+await page.waitForFunction(() => window.missions);
+assert.equal(await text('#ship-name'), 'Voyager 1');
+assert.match(await text('#sun-km'), /^\d{2},\d{3},\d{3},\d{3} km$/);
+assert.match(await text('#signal'), /\d+ h \d\d m \d\d s/);
+assert.equal(await page.locator('.ship-tab').count(), 6);
+await page.click('#hail');
+assert.match(await text('#hail-note'), /of the way there/);
+await page.locator('.ship-tab[data-id="jwst"]').click();
+assert.equal(await page.evaluate(() => missions.view), 'earth', 'Webb did not open the near-Earth view');
+assert.match(await text('#signal'), /seconds/);
+await page.click('#view-sun');
+assert.equal(await page.evaluate(() => missions.sel), 'v1');
+assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'long missions scrolls sideways on a phone');
+const mapLit = await page.evaluate(() => {
+  const c = document.getElementById('map'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 0) n++;
+  return n;
+});
+assert.ok(mapLit > 5000, 'the map is not drawn');
+await page.locator('.ship-tab[data-id="v2"]').click();
+await Promise.all([page.waitForNavigation(), page.click('#ship-course')]);
+await page.waitForFunction(() => window.engage);
+assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose the star Voyager 2 is bound for');
+
 await page.goto(base);
 await page.waitForFunction(() => window.engage);
 

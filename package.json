@@ -4,6 +4,6 @@
   "type": "module",
   "description": "Set course for a real star, pick a warp factor and go.",
   "scripts": {
-    "test": "node --test test/physics.test.mjs test/maru.test.mjs && node test/e2e.mjs"
+    "test": "node --test test/physics.test.mjs test/maru.test.mjs test/missions.test.mjs && node test/e2e.mjs"
   }
 }

@@ -1,5 +1,5 @@
-// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png):  node tools/screenshots.mjs
-// Only the planetary survey's, or the Kobayashi Maru's:  node tools/screenshots.mjs survey  (or maru)
+// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png):  node tools/screenshots.mjs
+// Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, or missions)
 // Math.random is seeded, so the warp streaks come out the same each time.
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
@@ -177,6 +177,44 @@ if (!only || only === 'maru') {
   <div class="text"><div class="eyebrow">Starfleet Academy</div><h1>Kobayashi Maru</h1><p>The no-win test. You can’t save everyone, so you’re graded on how you lose.</p><div class="meta">One order a turn</div></div>`);
   await card.waitForTimeout(300);
   await card.screenshot({ path: join(root, 'og-maru.png') });
+  await card.context().close();
+}
+
+// Long missions: a phone screenshot of the map for the README, and its link preview with the map beside the words.
+if (!only || only === 'missions') {
+  const page = await open({ width: 390, height: 844 }, 2);
+  await page.goto(base + 'missions.html#v1');
+  await page.waitForFunction(() => window.missions);
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: join(root, 'docs/phone-missions.png') });
+  await page.context().close();
+
+  const wide = await open({ width: 640, height: 700 }, 1);
+  await wide.goto(base + 'missions.html#v1');
+  await wide.waitForFunction(() => window.missions);
+  await wide.evaluate(() => document.fonts.ready);
+  await wide.waitForTimeout(600);
+  const shot = await wide.evaluate(() => document.getElementById('map').toDataURL());
+  await wide.context().close();
+
+  const font = async f => (await readFile(join(root, 'fonts', f))).toString('base64');
+  const card = await open({ width: 1200, height: 630 }, 1);
+  await card.setContent(`<!doctype html><style>
+    @font-face { font-family: C; font-weight: 600; src: url(data:font/woff2;base64,${await font('chakra-petch-600.woff2')}); }
+    @font-face { font-family: P; src: url(data:font/woff2;base64,${await font('ibm-plex-sans.woff2')}); }
+    body { margin: 0; width: 1200px; height: 630px; background: radial-gradient(ellipse at 20% 0%, #13213d, #05070d 65%); color: #e8edf6; overflow: hidden; position: relative; }
+    .text { position: absolute; left: 72px; top: 0; bottom: 0; width: 540px; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
+    .eyebrow { font: 600 22px C; letter-spacing: .18em; text-transform: uppercase; color: #86d8ff; }
+    h1 { margin: 10px 0 18px; font: 600 80px/1 C; letter-spacing: .03em; }
+    p { margin: 0; font: 32px/1.3 P; color: #cdd5e3; max-width: 500px; }
+    .meta { margin-top: 30px; font: 600 22px C; letter-spacing: .08em; color: #ffb54a; }
+    .view { position: absolute; right: -10px; top: -30px; width: 640px; height: 700px; background: url(${shot}) center / contain no-repeat; }
+  </style>
+  <div class="view"></div>
+  <div class="text"><div class="eyebrow">Engage · Long-range sensors</div><h1>Long missions</h1><p>The Voyagers, New Horizons, Webb and the Pioneers, where they are right now.</p><div class="meta">From NASA’s own trajectories</div></div>`);
+  await card.waitForTimeout(300);
+  await card.screenshot({ path: join(root, 'og-missions.png') });
   await card.context().close();
 }
 

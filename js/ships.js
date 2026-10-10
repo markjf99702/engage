@@ -1,0 +1,103 @@
+// The ships on long missions: what each one is, what it has done, and what it is doing now.
+// Positions come from js/ephemeris.js; this file is the words. Status notes are as of 2026.
+
+export const SHIPS = [
+  {
+    id: 'v1', name: 'Voyager 1', color: '#ffb54a', status: 'active',
+    agency: 'NASA', launched: '1977-09-05', from: 'Cape Canaveral',
+    tagline: 'The farthest anything from Earth has ever gone.',
+    where: 'In interstellar space, past the edge of the Sun’s bubble since 2012',
+    now: 'Still talking to Earth, at 160 bits a second through a radio about as strong as a fridge light. Her plutonium power supply loses about 4 watts a year, so NASA switches instruments off one by one to keep her going. In 2025 the cosmic ray instrument went quiet, and the low-energy particle instrument was due to follow in 2026, leaving the magnetometer and the plasma wave instrument listening to interstellar space.',
+    log: [
+      ['1977-09-05', 'Launched from Cape Canaveral, sixteen days after her twin, on a faster path.'],
+      ['1979-03-05', 'Jupiter. Found volcanoes erupting on its moon Io, the first active volcanoes seen beyond Earth.'],
+      ['1980-11-12', 'Saturn, and a close pass over Titan’s thick orange haze. Titan’s gravity flung her up and out of the planets’ plane for good.'],
+      ['1990-02-14', 'Turned around and took the Pale Blue Dot: Earth as a speck, from 6 billion km away.'],
+      ['1998-02-17', 'Overtook Pioneer 10 to become the farthest human-made object.'],
+      ['2012-08-25', 'Crossed the heliopause at 121.6 AU, the first ship to reach interstellar space.'],
+      ['2024-04-20', 'Making sense again after five months of gibberish, fixed from 22 light-hours away by moving code around a failed memory chip.'],
+    ],
+    bound: { star: 'Gliese 445', text: 'She’s heading out of the Solar System toward Ophiuchus. In about 40,000 years she’ll pass 1.6 light-years from the red dwarf Gliese 445.' },
+    record: 'Carries the Golden Record: sounds and pictures of Earth, and music from Bach to Chuck Berry.',
+  },
+  {
+    id: 'v2', name: 'Voyager 2', color: '#86d8ff', status: 'active',
+    agency: 'NASA', launched: '1977-08-20', from: 'Cape Canaveral',
+    tagline: 'The only ship to visit Uranus and Neptune.',
+    where: 'In interstellar space since 2018, falling away below the planets’ plane',
+    now: 'She’s so far south of the planets’ plane that only one dish on Earth can reach her: the 70-metre antenna at Canberra, Australia. NASA turned off her plasma instrument in 2024 and her low-energy particle instrument in 2025 to save power, and the cosmic ray instrument was due to follow in 2026.',
+    log: [
+      ['1977-08-20', 'Launched first, on the slower path that could reach all four giant planets.'],
+      ['1979-07-09', 'Jupiter.'],
+      ['1981-08-25', 'Saturn.'],
+      ['1986-01-24', 'Uranus, the only visit it has ever had. Found 10 new moons.'],
+      ['1989-08-25', 'Neptune and its moon Triton, the last stop of the Grand Tour. Neptune bent her path south.'],
+      ['2018-11-05', 'Crossed the heliopause at 119 AU into interstellar space.'],
+      ['2023-08-04', 'A wrong command had tilted her antenna 2 degrees off Earth. Canberra shouted a fix at full power, and she turned back.'],
+    ],
+    bound: { star: 'Ross 248', text: 'She’s heading toward Pavo, the Peacock. In about 40,000 years she’ll pass 1.7 light-years from the red dwarf Ross 248, and in 296,000 years, 4.3 light-years from Sirius.' },
+    record: 'Carries the other copy of the Golden Record.',
+  },
+  {
+    id: 'nh', name: 'New Horizons', color: '#c9a6ff', status: 'active',
+    agency: 'NASA', launched: '2006-01-19', from: 'Cape Canaveral',
+    tagline: 'Pluto’s first visitor, now crossing the Kuiper Belt.',
+    where: 'In the Kuiper Belt, the ring of icy worlds beyond Neptune',
+    now: 'Measuring the solar wind, dust and the faint glow of the outer Solar System, and photographing distant Kuiper Belt worlds from angles no telescope at home can. She sleeps spinning between check-ins, and has power to keep working into the 2040s, when she should leave the Sun’s bubble too.',
+    log: [
+      ['2006-01-19', 'Launched faster than anything before her: past the Moon’s orbit in nine hours.'],
+      ['2007-02-28', 'Jupiter, for a gravity boost that cut three years off the trip.'],
+      ['2015-07-14', 'Pluto, 12,500 km above its surface. Found a heart-shaped plain of nitrogen ice.'],
+      ['2019-01-01', 'Arrokoth, a snowman-shaped world 6.6 billion km out: the farthest object anything has ever visited.'],
+    ],
+    bound: { text: 'She’s heading toward Sagittarius, the direction of the centre of the galaxy. No star lies close to her path.' },
+    record: 'Carries some of the ashes of Clyde Tombaugh, who found Pluto in 1930.',
+  },
+  {
+    id: 'jwst', name: 'James Webb', full: 'James Webb Space Telescope', color: '#ffd27a', status: 'active',
+    agency: 'NASA, ESA and CSA', launched: '2021-12-25', from: 'Kourou, French Guiana',
+    tagline: 'On station at L2, looking back to the first galaxies.',
+    where: 'Circling the Sun–Earth L2 point, 1.5 million km beyond Earth, on the side away from the Sun',
+    now: 'Observing around the clock. A sunshield the size of a tennis court keeps her mirror and cameras colder than −223 °C, so she can see the faint heat of galaxies whose light left them 13 billion years ago. She loops around L2 about every six months, and her launch was so precise she has fuel for about 20 years.',
+    log: [
+      ['2021-12-25', 'Launched on an Ariane 5 from Kourou, folded up like origami.'],
+      ['2022-01-08', 'Finished unfolding: sunshield, then the 6.5-metre gold mirror in 18 pieces.'],
+      ['2022-01-24', 'Arrived at L2, a month after launch.'],
+      ['2022-07-12', 'First full-colour pictures, including the deepest view of the universe yet.'],
+    ],
+    bound: { text: 'She isn’t going anywhere. L2 keeps pace with Earth, so she circles the Sun with us once a year.' },
+    near: true,
+  },
+  {
+    id: 'p10', name: 'Pioneer 10', color: '#9aa7bd', status: 'silent', silentSince: '2003-01-23',
+    agency: 'NASA', launched: '1972-03-03', from: 'Cape Canaveral',
+    tagline: 'The first ship through the asteroid belt and past Jupiter.',
+    where: 'Out of contact, coasting toward Taurus',
+    now: 'Her last faint signal reached Earth on 23 January 2003, when her power ran too low to answer. She’s still out there, on the path shown here, and will be for millions of years.',
+    log: [
+      ['1972-03-03', 'Launched toward Jupiter, through an asteroid belt nobody was sure a ship could cross.'],
+      ['1973-12-03', 'Jupiter, the first close look at any giant planet.'],
+      ['1983-06-13', 'Crossed Neptune’s orbit, the first ship to pass beyond the planets.'],
+      ['2003-01-23', 'Last signal heard.'],
+    ],
+    bound: { star: 'Aldebaran', text: 'She’s heading for Aldebaran, the red eye of Taurus, 65 light-years away. At her speed that’s about 2 million years.' },
+    record: 'Carries the Pioneer plaque: a map to the Sun and a drawing of two people.',
+  },
+  {
+    id: 'p11', name: 'Pioneer 11', color: '#9aa7bd', status: 'silent', silentSince: '1995-09-30',
+    agency: 'NASA', launched: '1973-04-06', from: 'Cape Canaveral',
+    tagline: 'The first ship to reach Saturn.',
+    where: 'Out of contact, coasting toward Aquila',
+    now: 'NASA heard from her for the last time in September 1995, when she no longer had the power to point her antenna at Earth. She keeps going, silent, on the path shown here.',
+    log: [
+      ['1973-04-06', 'Launched, a year behind her twin.'],
+      ['1974-12-02', 'Jupiter, from just 43,000 km above the clouds. Jupiter threw her back across the Solar System toward Saturn.'],
+      ['1979-09-01', 'Saturn, the first visit, finding a new ring and scouting the way for the Voyagers.'],
+      ['1995-09-30', 'Last contact.'],
+    ],
+    bound: { star: 'λ Aquilae', text: 'She’s heading toward Aquila, the Eagle. In about 4 million years she’ll pass near the star Lambda Aquilae.' },
+    record: 'Carries the same plaque as Pioneer 10.',
+  },
+];
+
+export const byId = id => SHIPS.find(s => s.id === id);

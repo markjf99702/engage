@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Long missions · Engage</title>
+  <meta name="description" content="Where Voyager 1 and 2, New Horizons, the James Webb Space Telescope and the silent Pioneers are right now, from NASA’s own trajectories. How far, how fast, how long a hail takes, and where each one is bound.">
+  <meta property="og:title" content="Long missions">
+  <meta property="og:description" content="The Voyagers, New Horizons, Webb and the Pioneers, where they are right now and how long a hail takes to reach them.">
+  <meta property="og:image" content="https://junkdrawer.works/engage/og-missions.png">
+  <meta property="og:url" content="https://junkdrawer.works/engage/missions.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#05070d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preload" href="fonts/chakra-petch-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/missions.css">
+</head>
+<body class="missions">
+  <noscript><p class="noscript">Long missions needs JavaScript to work out where the ships are.</p></noscript>
+
+  <header class="top">
+    <a class="back" href="./" aria-label="Back to the bridge">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      <span>Bridge</span>
+    </a>
+    <div class="title">
+      <p class="eyebrow">Engage · Long-range sensors</p>
+      <h1>Long missions</h1>
+    </div>
+  </header>
+
+  <main>
+    <section class="board">
+      <div class="map-wrap">
+        <canvas id="map" aria-label="Map of the Solar System with the ships on it"></canvas>
+        <div class="views" role="group" aria-label="Map view">
+          <button type="button" id="view-sun" aria-pressed="true">Solar System</button>
+          <button type="button" id="view-earth" aria-pressed="false">Near Earth</button>
+        </div>
+        <p class="clock" id="clock" aria-live="off"></p>
+      </div>
+      <p class="scale" id="scale"></p>
+
+      <div class="fleet" id="fleet" role="tablist" aria-label="Ships"></div>
+
+      <article class="file" id="file" aria-live="polite">
+        <p class="eyebrow" id="ship-agency"></p>
+        <h2 id="ship-name"></h2>
+        <p class="tagline" id="ship-tagline"></p>
+        <p class="where" id="ship-where"></p>
+
+        <dl class="live" id="live">
+          <div><dt>From the Sun</dt><dd><b id="sun-km"></b><span id="sun-au"></span></dd></div>
+          <div><dt>From Earth</dt><dd><b id="earth-km"></b><span id="earth-au"></span></dd></div>
+          <div><dt>Speed</dt><dd><b id="speed"></b><span id="speed-h"></span></dd></div>
+          <div><dt>Signal</dt><dd><b id="signal"></b><span id="signal-note"></span></dd></div>
+          <div><dt>Mission</dt><dd><b id="age"></b><span id="launched"></span></dd></div>
+        </dl>
+
+        <div class="hail">
+          <button class="primary" id="hail" type="button">Hail her</button>
+          <p id="hail-note"></p>
+        </div>
+
+        <p class="next" id="next" hidden></p>
+
+        <h3>Ship’s status</h3>
+        <p id="ship-now"></p>
+
+        <h3>Mission log</h3>
+        <ol class="log" id="ship-log"></ol>
+
+        <h3>Where she’s bound</h3>
+        <p id="ship-bound"></p>
+        <p class="warp" id="ship-warp"></p>
+        <a class="fly" id="ship-course" href="./" hidden>Set course on the bridge →</a>
+        <p class="record" id="ship-record"></p>
+      </article>
+    </section>
+
+    <p class="source">Positions from NASA JPL’s Horizons system, worked out for this moment in your browser. The probes follow the paths NASA tracks them on; the planets use JPL’s orbital elements.</p>
+  </main>
+
+  <footer class="jd-foot">
+    <a href="./">Engage</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+  </footer>
+
+  <script type="module" src="js/missions.js"></script>
+</body>
+</html>
