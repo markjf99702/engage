@@ -55,6 +55,7 @@ a.round { color: var(--text); text-decoration: none; }
 #look-home svg circle:first-child { fill: var(--sun); stroke: none; }
 #open-maru svg { stroke: #ff8f84; }
 #open-missions svg { stroke: var(--cyan); }
+#open-sky svg { stroke: var(--sun); }
 #look-home svg .ring { stroke: var(--sun); stroke-width: 1.2; stroke-dasharray: 2 3; }
 
 /* Warp readout */
@@ -170,7 +171,7 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 
 .jd-foot a:hover, .jd-foot a:focus-visible { text-decoration: underline; color: var(--muted); }
 
 @media (max-width: 480px) {
-  .hud-buttons { gap: 6px; }
+  .hud-buttons { gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: calc(4 * 38px + 3 * 6px); }
   .round { width: 38px; height: 38px; }
   .round svg { width: 18px; height: 18px; }
 }

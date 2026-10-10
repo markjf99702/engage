@@ -1,5 +1,5 @@
-// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png):  node tools/screenshots.mjs
-// Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, or missions)
+// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png, og-tonight.png):  node tools/screenshots.mjs
+// Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, missions or tonight)
 // Math.random is seeded, so the warp streaks come out the same each time.
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
@@ -215,6 +215,48 @@ if (!only || only === 'missions') {
   <div class="text"><div class="eyebrow">Engage · Long-range sensors</div><h1>Long missions</h1><p>The Voyagers, New Horizons, Webb and the Pioneers, where they are right now.</p><div class="meta">From NASA’s own trajectories</div></div>`);
   await card.waitForTimeout(300);
   await card.screenshot({ path: join(root, 'og-missions.png') });
+  await card.context().close();
+}
+
+// Tonight's sky: a phone screenshot facing east from New York after midnight, and its link preview.
+if (!only || only === 'tonight') {
+  const setUp = () => { tonight.place(40.71, -74.01, 'New York', 'America/New_York'); tonight.at('2026-10-11T04:30:00Z'); tonight.look(105, 32, 82); };
+  const page = await open({ width: 390, height: 844 }, 2);
+  await page.goto(base + 'tonight.html');
+  await page.waitForFunction(() => window.tonight);
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(setUp);
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: join(root, 'docs/phone-tonight.png') });
+  await page.context().close();
+
+  const wide = await open({ width: 700, height: 630 }, 1);
+  await wide.goto(base + 'tonight.html');
+  await wide.waitForFunction(() => window.tonight);
+  await wide.evaluate(() => document.fonts.ready);
+  await wide.evaluate(setUp);
+  await wide.waitForTimeout(400);
+  const shot = await wide.evaluate(() => document.getElementById('view').toDataURL());
+  await wide.context().close();
+
+  const font = async f => (await readFile(join(root, 'fonts', f))).toString('base64');
+  const card = await open({ width: 1200, height: 630 }, 1);
+  await card.setContent(`<!doctype html><style>
+    @font-face { font-family: C; font-weight: 600; src: url(data:font/woff2;base64,${await font('chakra-petch-600.woff2')}); }
+    @font-face { font-family: P; src: url(data:font/woff2;base64,${await font('ibm-plex-sans.woff2')}); }
+    body { margin: 0; width: 1200px; height: 630px; background: #05070d; color: #e8edf6; overflow: hidden; position: relative; }
+    .text { position: absolute; left: 64px; top: 0; bottom: 0; width: 500px; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
+    .eyebrow { font: 600 22px C; letter-spacing: .18em; text-transform: uppercase; color: #86d8ff; }
+    h1 { margin: 10px 0 18px; font: 600 76px/1 C; letter-spacing: .03em; }
+    p { margin: 0; font: 32px/1.3 P; color: #cdd5e3; }
+    .meta { margin-top: 30px; font: 600 22px C; letter-spacing: .08em; color: #ffb54a; }
+    .view { position: absolute; right: 0; top: 0; width: 700px; height: 630px; background: url(${shot}) center / cover no-repeat; }
+    .view::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #05070d 0%, rgba(5, 7, 13, 0) 30%); }
+  </style>
+  <div class="view"></div>
+  <div class="text"><div class="eyebrow">Engage · Tonight’s sky</div><h1>Starfleet style</h1><p>Point your phone at the sky and see where Vulcan is tonight.</p><div class="meta">Every star tagged where it really is</div></div>`);
+  await card.waitForTimeout(300);
+  await card.screenshot({ path: join(root, 'og-tonight.png') });
   await card.context().close();
 }
 
