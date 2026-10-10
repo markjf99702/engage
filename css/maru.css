@@ -1,0 +1,118 @@
+/* The Kobayashi Maru page. Builds on css/app.css for fonts, colours, buttons and the footer. */
+
+html, body.maru { height: auto; overflow: auto; overflow-x: hidden; }
+body.maru { min-height: 100%; background: radial-gradient(ellipse at 50% -10%, #2a0f14 0%, var(--bg) 55%) fixed, var(--bg); }
+body.maru.red { background: radial-gradient(ellipse at 50% -10%, #4a1016 0%, var(--bg) 60%) fixed, var(--bg); }
+.maru main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+.maru { --red: #ff6b5e; --green: #6fe3a4; --klingon: #ff8a5c; }
+
+/* Header, as on the survey */
+.top { max-width: 1120px; margin: 0 auto; padding: calc(14px + var(--safe-t)) 16px 10px; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; }
+.back { display: inline-flex; align-items: center; gap: 4px; height: 40px; padding: 0 12px 0 6px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--panel);
+  color: var(--text); text-decoration: none; font: 600 13px/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+.back:hover { border-color: var(--cyan); }
+.back svg { width: 20px; height: 20px; }
+.title h1 { margin: 2px 0 0; font: 600 22px/1.15 var(--display); letter-spacing: 0.04em; }
+
+.card { padding: 20px 18px 16px; border-radius: 20px; border: 1px solid var(--line); background: var(--panel); }
+.card h2 { margin: 4px 0 10px; font: 600 28px/1.1 var(--display); letter-spacing: 0.03em; }
+.card p { margin: 0 0 10px; color: #cdd5e3; }
+.card .eyebrow { color: var(--red); }
+
+/* Briefing */
+#brief:not([hidden]) { display: grid; gap: 12px; max-width: 640px; margin: 6px auto 0; }
+.brief .how { color: var(--muted); }
+.brief .primary { width: 100%; margin-top: 6px; }
+.brief .text-button { display: block; margin: 8px auto 0; color: var(--muted); font-size: 13px; }
+.record ol { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 0; }
+.record li { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+.record li b { font: 600 16px/1.2 var(--display); letter-spacing: 0.02em; }
+.record li .when { font-size: 12px; color: var(--dim); text-align: right; }
+.record li .letters { grid-column: 1 / -1; font: 500 13px/1.3 var(--display); letter-spacing: 0.08em; color: var(--muted); }
+
+/* The tactical display */
+.plot-wrap { position: relative; margin: 4px -16px 0; border-block: 1px solid rgba(255, 107, 94, 0.18); background: #04060b; }
+#plot { display: block; width: 100%; aspect-ratio: 10 / 8; touch-action: manipulation; }
+.turn { position: absolute; left: 12px; top: 8px; margin: 0; font: 600 11px/1.2 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); }
+.alert { position: absolute; right: 12px; top: 8px; margin: 0; padding: 4px 8px; border-radius: 6px; font: 600 11px/1.2 var(--display); letter-spacing: 0.18em; text-transform: uppercase;
+  color: #fff; background: rgba(255, 70, 60, 0.85); animation: pulse 1.2s ease-in-out infinite; }
+.caption { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 26px 14px 10px; font-size: 14px; line-height: 1.4; color: #e3e8f1;
+  background: linear-gradient(to top, rgba(4, 6, 11, 0.95) 40%, rgba(4, 6, 11, 0)); pointer-events: none; min-height: 1em; }
+.caption:empty { display: none; }
+.caption .who { display: block; font: 600 10px/1.4 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+.caption.bad .who { color: var(--red); } .caption.good .who { color: var(--green); } .caption.klingon .who { color: var(--klingon); }
+@keyframes pulse { 50% { opacity: 0.45; } }
+
+.side { display: grid; gap: 10px; margin-top: 10px; }
+.status { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; padding: 12px 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--panel); }
+.gauge { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 2px 8px; min-width: 0; }
+.g-k { font: 600 10px/1.3 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+.g-v { font: 600 17px/1.2 var(--display); font-variant-numeric: tabular-nums; }
+.bar { grid-column: 1 / -1; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 100%; border-radius: 3px; background: var(--cyan); transition: width .6s, background .6s; }
+#hull-bar { background: var(--amber); }
+.bar i.low { background: var(--red); }
+#maru-left { color: var(--cyan); }
+#rescued { color: var(--green); }
+
+.orders { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.order { display: grid; align-content: start; gap: 3px; min-height: 64px; padding: 10px 12px; text-align: left; border-radius: 14px; border: 1px solid var(--line-strong); background: rgba(255, 255, 255, 0.03); transition: border-color .15s, background .15s, opacity .2s; }
+.order:hover:not(:disabled) { border-color: var(--cyan); background: rgba(134, 216, 255, 0.05); }
+.order b { font: 600 15px/1.2 var(--display); letter-spacing: 0.02em; }
+.order span { font-size: 12px; line-height: 1.3; color: var(--muted); }
+.order.primary-order { border-color: rgba(255, 181, 74, 0.55); background: rgba(255, 181, 74, 0.07); }
+.order.primary-order b { color: var(--amber); }
+.order.danger { border-color: rgba(255, 107, 94, 0.55); }
+.order.danger b { color: var(--red); }
+.order:disabled { cursor: default; opacity: 0.4; }
+.orders.busy .order { opacity: 0.55; pointer-events: none; }
+.orders .wide { grid-column: 1 / -1; }
+.orders > .primary { grid-column: 1 / -1; height: 52px; }
+
+.comms { margin-top: 10px; max-height: 240px; overflow-y: auto; overscroll-behavior: contain; padding: 4px 14px; border-radius: 16px; border: 1px solid var(--line); background: rgba(5, 8, 15, 0.7); }
+.line { margin: 0; padding: 7px 0; border-top: 1px solid var(--line); font-size: 14px; color: #cdd5e3; animation: in .3s ease-out; }
+.line:first-child { border-top: 0; }
+.line .who { display: block; font: 600 10px/1.4 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+.line.bad { color: #ffc2bb; }
+.line.bad .who { color: var(--red); }
+.line.good .who { color: var(--green); }
+.line.klingon { color: #ffd2b8; }
+.line.klingon .who { color: var(--klingon); }
+.line.turn-mark { padding: 10px 0 2px; border: 0; font: 600 10px/1.2 var(--display); letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); }
+@keyframes in { from { opacity: 0; transform: translateY(4px); } }
+
+/* Evaluation */
+#eval:not([hidden]) { display: block; max-width: 680px; margin: 6px auto 0; }
+.evaluation h2 { font-size: 34px; color: var(--text); }
+.evaluation .summary { font-size: 16px; color: var(--text); }
+.evaluation h3 { margin: 18px 0 6px; font: 600 11px/1.2 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); }
+.grades { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0 4px; }
+.grade { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.02); }
+.grade .l { grid-row: span 2; font: 600 40px/1 var(--display); width: 1.1em; text-align: center; }
+.grade .n { font: 600 11px/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.grade .w { font-size: 13px; line-height: 1.35; color: #cdd5e3; }
+.grade.A .l { color: var(--green); } .grade.B .l { color: var(--cyan); } .grade.C .l { color: var(--amber); } .grade.D .l, .grade.F .l { color: var(--red); }
+.moral { margin-top: 16px !important; padding-top: 12px; border-top: 1px solid var(--line); font-style: italic; color: var(--muted) !important; }
+.eval-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.eval-actions > * { flex: 1 1 160px; display: inline-grid; place-items: center; text-decoration: none; }
+
+.maru .jd-foot { padding: 28px 0 calc(18px + var(--safe-b)); }
+
+@media (max-width: 400px) {
+  .grades { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 760px) {
+  .top { padding: calc(20px + var(--safe-t)) 24px 14px; }
+  .title h1 { font-size: 26px; }
+  .maru main { padding: 0 24px; }
+  #sim:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr); grid-template-areas: 'plot side' 'comms side'; gap: 12px 20px; align-items: start; }
+  .plot-wrap { grid-area: plot; margin: 4px 0 0; border: 1px solid rgba(255, 107, 94, 0.18); border-radius: 18px; overflow: hidden; }
+  #plot { aspect-ratio: 10 / 7; }
+  .side { grid-area: side; margin-top: 4px; }
+  .comms { grid-area: comms; margin-top: 0; max-height: 300px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alert, .line { animation: none; }
+}
