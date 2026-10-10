@@ -225,6 +225,59 @@ await Promise.all([page.waitForNavigation(), page.click('#ship-course')]);
 await page.waitForFunction(() => window.engage);
 assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose the star Voyager 2 is bound for');
 
+// Tonight's sky: reached from the bridge, the stars tagged where they really are, a tap on Vulcan, and a course set.
+await page.goto(base);
+await page.waitForFunction(() => window.engage);
+await Promise.all([page.waitForNavigation(), page.click('#open-sky')]);
+await page.waitForFunction(() => window.tonight);
+await page.evaluate(() => { tonight.place(40.71, -74.01, 'New York', 'America/New_York'); tonight.at('2026-10-11T04:30:00Z'); });
+const vulcan = await page.evaluate(() => tonight.tag('Vulcan'));
+assert.ok(vulcan.alt > 20 && vulcan.alt < 26, `Vulcan’s sun is not where it is at 12:30 am in New York: ${vulcan.alt}`);
+assert.ok(vulcan.seen, 'a magnitude 4.4 star is not visible from the suburbs');
+assert.equal(await page.evaluate(() => tonight.tag('Wolf 359').seen), false, 'Wolf 359 can be seen without a telescope');
+assert.match(await text('#clock'), /12:30/);
+assert.equal(await shown('#daylight'), false, 'the daylight notice shows at night');
+await page.evaluate(() => tonight.aimAt('Vulcan'));
+await page.waitForTimeout(200);
+const spot = await page.evaluate(() => tonight.where('Vulcan'));
+await page.touchscreen.tap(spot.x, spot.y);
+assert.equal(await text('#card-title'), 'Vulcan', 'tapping the tag did not open Vulcan');
+assert.match(await text('#card-look'), /up in the south-east/);
+const skyLit = await page.evaluate(() => {
+  const c = document.getElementById('view'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] > 300) n++;
+  return n;
+});
+assert.ok(skyLit > 500, 'the sky is not drawn');
+// The list, and a city picked by hand.
+await page.click('[data-close]');
+await page.click('#open-list');
+assert.match(await text('#list-note'), /of Starfleet’s \d+ charted stars/);
+assert.match(await page.locator('.system.trek').first().innerText(), /Vulcan|Capella|Aldebaran|Rigel|Pollux|Farpoint|Vega|Altair/);
+await page.locator('#list [data-close]').click();
+await page.click('#open-place');
+await page.locator('.city', { hasText: 'Sydney' }).click();
+assert.equal(await text('#place-name'), 'Sydney');
+assert.ok(await page.evaluate(() => tonight.tag('Cochrane’s home').alt) > 0, 'Alpha Centauri is not up from Sydney');
+// Holding the phone up toward the east, 30° above the horizon.
+await page.evaluate(() => tonight.sense(270, 120, 0));
+const pointing = await page.evaluate(() => tonight.pointing());
+assert.ok(Math.abs(pointing.az - 90) < 1 && Math.abs(pointing.alt - 30) < 1, 'the sky does not follow the phone');
+await page.evaluate(() => tonight.unsense());
+// In daylight it says so, and offers the evening.
+await page.evaluate(() => { tonight.place(40.71, -74.01, 'New York', 'America/New_York'); tonight.at('2026-10-10T17:00:00Z'); });
+assert.equal(await shown('#daylight'), true, 'no daylight notice at noon');
+await page.click('#go-dark');
+assert.ok(await page.evaluate(() => tonight.state.sunAlt) < -11, 'show tonight did not move to the dark');
+assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'tonight’s sky scrolls sideways on a phone');
+await page.evaluate(() => { tonight.at('2026-10-11T04:30:00Z'); tonight.aimAt('Vulcan'); });
+await page.waitForTimeout(200);
+const v2 = await page.evaluate(() => tonight.where('Vulcan'));
+await page.touchscreen.tap(v2.x, v2.y);
+await Promise.all([page.waitForNavigation(), page.click('#card-course')]);
+await page.waitForFunction(() => window.engage);
+assert.equal(await text('#target-name'), '40 Eridani', 'set course did not choose Vulcan’s sun');
+
 await page.goto(base);
 await page.waitForFunction(() => window.engage);
 

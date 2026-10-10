@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Tonight’s sky · Engage</title>
+  <meta name="description" content="Point your phone at the night sky and see which stars Starfleet knows: Vulcan’s sun, Farpoint, the Vega colony, Wolf 359. Tap one to set course for it on the bridge.">
+  <meta property="og:title" content="Tonight’s sky, Starfleet style">
+  <meta property="og:description" content="Point your phone at the sky and see where Vulcan is tonight.">
+  <meta property="og:image" content="https://junkdrawer.works/engage/og-tonight.png">
+  <meta property="og:url" content="https://junkdrawer.works/engage/tonight.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#05070d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preload" href="fonts/chakra-petch-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="data/stars.bin" as="fetch" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/tonight.css">
+</head>
+<body class="tonight">
+  <noscript><p class="noscript">Tonight’s sky needs JavaScript to work out where the stars are.</p></noscript>
+
+  <main id="scope" aria-label="Tonight’s sky">
+    <canvas id="view" aria-label="The sky from where you are. Drag to look around, pinch or scroll to zoom, tap a star to read about it."></canvas>
+    <div class="pointer" id="pointer" hidden aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg><span id="pointer-name"></span></div>
+
+    <header class="hud">
+      <a class="back" href="./" aria-label="Back to the bridge">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+        <span>Bridge</span>
+      </a>
+      <div class="title">
+        <p class="eyebrow">Engage · Tonight’s sky</p>
+        <button class="place" id="open-place" type="button"><span id="place-name">Finding you…</span> <span id="clock"></span></button>
+      </div>
+      <div class="hud-buttons">
+        <button class="round" id="open-list" type="button" title="Starfleet systems in your sky" aria-label="Starfleet systems in your sky">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></svg>
+        </button>
+        <button class="round" id="night" type="button" aria-pressed="false" title="Night vision: red light that keeps your eyes dark-adapted" aria-label="Night vision">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"/><circle cx="12" cy="12" r="2.6"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="daylight" id="daylight" hidden>
+      <p id="daylight-text"></p>
+      <button class="secondary" id="go-dark" type="button">Show tonight</button>
+    </div>
+
+    <section class="controls" aria-label="Controls">
+      <p class="hint" id="hint">Drag to look around. Tap a tag to read it.</p>
+      <div class="row">
+        <button class="primary" id="sensors" type="button">Point your phone</button>
+        <label class="time">
+          <span class="time-label"><output id="time-out" for="time">Now</output></span>
+          <input type="range" id="time" min="0" max="720" step="10" value="0" aria-label="Time: now to 12 hours ahead">
+        </label>
+      </div>
+    </section>
+  </main>
+
+  <div class="scrim" id="scrim" hidden></div>
+
+  <section class="sheet card" id="card" hidden aria-label="About this star" aria-live="polite">
+    <div class="sheet-head">
+      <p class="eyebrow" id="card-kind"></p>
+      <button class="close" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <h2 id="card-title"></h2>
+    <p class="card-sub" id="card-sub"></p>
+    <p class="look" id="card-look"></p>
+    <p class="story" id="card-line"></p>
+    <p class="facts" id="card-facts"></p>
+    <a class="primary fly" id="card-course" href="./">Set course</a>
+  </section>
+
+  <section class="sheet" id="list" hidden aria-label="Starfleet systems in your sky">
+    <div class="sheet-head">
+      <h2>In your sky</h2>
+      <button class="close" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="list-note" id="list-note"></p>
+    <div class="systems" id="systems"></div>
+  </section>
+
+  <section class="sheet" id="places" hidden aria-label="Where you are">
+    <div class="sheet-head">
+      <h2>Where you are</h2>
+      <button class="close" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="scroll">
+      <button class="secondary wide" id="locate" type="button">Use my location</button>
+      <p class="place-note" id="place-note"></p>
+      <h3>How dark is your sky?</h3>
+      <div class="skies" id="skies" role="radiogroup" aria-label="How dark your sky is"></div>
+      <h3>Or pick a city</h3>
+      <div class="cities" id="cities"></div>
+      <footer class="jd-foot">
+        <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+      </footer>
+    </div>
+  </section>
+
+  <p class="loading" id="loading">Charting tonight’s sky…</p>
+
+  <script type="module" src="js/tonight.js"></script>
+</body>
+</html>

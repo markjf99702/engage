@@ -1,5 +1,5 @@
 // Bundles the whole app into one HTML file for the Artifact viewer:  node tools/build-artifact.mjs
-// Writes dist/engage.html, dist/survey.html, dist/maru.html and dist/missions.html: styles, fonts, scripts, star data and the Milky Way all inline, with no document wrapper
+// Writes dist/engage.html, dist/survey.html, dist/maru.html, dist/missions.html and dist/tonight.html: styles, fonts, scripts, star data and the Milky Way all inline, with no document wrapper
 // (the viewer adds its own). The site itself still runs from the repo as-is; this is only for the playable copy.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
@@ -60,7 +60,8 @@ window.fetch = async url => {
 const title = html.match(/<title>.*?<\/title>/)[0];
 const body = pageBody(html).replaceAll('href="survey.html"', `href="${LIVE}survey.html" target="_blank" rel="noopener"`)
   .replaceAll('href="maru.html"', `href="${LIVE}maru.html" target="_blank" rel="noopener"`)
-  .replaceAll('href="missions.html"', `href="${LIVE}missions.html" target="_blank" rel="noopener"`);
+  .replaceAll('href="missions.html"', `href="${LIVE}missions.html" target="_blank" rel="noopener"`)
+  .replaceAll('href="tonight.html"', `href="${LIVE}tonight.html" target="_blank" rel="noopener"`);
 const out = `${title}
 <meta name="theme-color" content="#05070d">
 <style>
@@ -141,3 +142,24 @@ ${missionsJs}
 `;
 await writeFile(join(root, 'dist/missions.html'), missionsOut);
 console.log(`dist/missions.html: ${(missionsOut.length / 1024).toFixed(0)} KB`);
+
+// Tonight's sky, as its own single file, with the stars inline. Links back to the bridge go to the live site.
+const tonightHtml = await read('tonight.html');
+const tonightJs = await bundle(['physics', 'destinations', 'ephemeris', 'astro', 'charts', 'log', 'catalog', 'tonight'], (name, src) =>
+  src.replace("const BRIDGE = './';", `const BRIDGE = '${LIVE}';`));
+const tonightOut = `<title>Tonight’s sky</title>
+<meta name="theme-color" content="#05070d">
+<style>
+${css}
+${await read('css/tonight.css')}
+</style>
+${pageBody(tonightHtml).replaceAll('href="./"', `href="${LIVE}" target="_blank" rel="noopener"`)}
+<script type="module">
+const __m = {};
+document.body.classList.add('tonight');
+${shim}
+${tonightJs}
+</script>
+`;
+await writeFile(join(root, 'dist/tonight.html'), tonightOut);
+console.log(`dist/tonight.html: ${(tonightOut.length / 1024 / 1024).toFixed(2)} MB`);
