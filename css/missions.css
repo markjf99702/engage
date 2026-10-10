@@ -1,0 +1,78 @@
+/* Long missions. Builds on css/app.css for fonts, colours, buttons and the footer. */
+
+html, body.missions { height: auto; overflow: auto; overflow-x: hidden; }
+body.missions { min-height: 100%; background: radial-gradient(ellipse at 50% -10%, #0e1a30 0%, var(--bg) 60%) fixed, var(--bg); --ship: var(--amber); }
+.missions main { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+
+/* Header, as on the survey */
+.top { max-width: 1120px; margin: 0 auto; padding: calc(14px + var(--safe-t)) 16px 10px; display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; }
+.back { display: inline-flex; align-items: center; gap: 4px; height: 40px; padding: 0 12px 0 6px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--panel);
+  color: var(--text); text-decoration: none; font: 600 13px/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+.back:hover { border-color: var(--cyan); }
+.back svg { width: 20px; height: 20px; }
+.title { min-width: 0; }
+.title h1 { margin: 2px 0 0; font: 600 22px/1.15 var(--display); letter-spacing: 0.04em; }
+.clock { position: absolute; right: 12px; top: 20px; margin: 0; pointer-events: none; font: 500 12px/1.2 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); font-variant-numeric: tabular-nums; text-align: right; }
+
+/* The map */
+.map-wrap { position: relative; margin: 4px -16px 0; border-block: 1px solid var(--line); background: radial-gradient(circle at 50% 50%, #0a1426 0%, #04060b 70%); }
+#map { display: block; width: 100%; aspect-ratio: 1 / 1.08; max-height: 78vh; touch-action: manipulation; cursor: pointer; }
+.views { position: absolute; left: 10px; top: 10px; display: flex; padding: 3px; gap: 3px; border-radius: 12px; border: 1px solid var(--line); background: rgba(5, 7, 13, 0.75); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.views button { height: 32px; padding: 0 10px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: 600 11px/1 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+.views button[aria-pressed="true"] { background: rgba(134, 216, 255, 0.14); color: var(--cyan); box-shadow: 0 0 0 1px rgba(134, 216, 255, 0.35) inset; }
+.scale { margin: 6px 0 0; font-size: 12px; color: var(--dim); }
+
+/* The fleet */
+.fleet { display: flex; gap: 6px; overflow-x: auto; margin: 10px -16px 0; padding: 2px 16px 10px; scroll-snap-type: x proximity; scrollbar-width: thin; }
+.ship-tab { flex: none; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0 8px; padding: 8px 12px 8px 10px; border-radius: 14px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); text-align: left; scroll-snap-align: center; }
+.ship-tab i { grid-row: span 2; width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 8px var(--c); }
+.ship-tab.silent i { box-shadow: none; opacity: 0.7; }
+.t-name { font: 600 15px/1.2 var(--display); letter-spacing: 0.03em; white-space: nowrap; }
+.t-sub { font: 500 12px/1.2 var(--display); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ship-tab:hover { border-color: var(--line-strong); }
+.ship-tab[aria-selected="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, transparent); }
+
+/* The ship's file */
+.file { margin: 4px 0 0; padding: 18px 18px 12px; border-radius: 20px; border: 1px solid var(--line); border-top: 3px solid var(--ship); background: var(--panel); }
+.file .eyebrow { color: var(--ship); }
+.file h2 { margin: 4px 0 2px; font: 600 28px/1.1 var(--display); letter-spacing: 0.03em; }
+.file .tagline { margin: 0 0 4px; color: var(--text); }
+.file .where { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+.file h3 { margin: 20px 0 6px; font: 600 11px/1.2 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); }
+.file p { margin: 0 0 8px; color: #cdd5e3; }
+
+.live { margin: 0; display: grid; }
+.live div { display: grid; grid-template-columns: 6.8em 1fr; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); }
+.live dt { font: 600 11px/1.7 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
+.live dd { margin: 0; display: grid; min-width: 0; }
+.live b { font: 600 19px/1.25 var(--display); letter-spacing: 0.02em; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.live span { font-size: 13px; color: var(--muted); }
+#signal { color: var(--cyan); }
+
+.hail { margin: 12px 0 0; padding: 14px; border-radius: 16px; border: 1px solid rgba(134, 216, 255, 0.25); background: rgba(134, 216, 255, 0.05); }
+.hail .primary { width: 100%; }
+.hail p { margin: 10px 0 0; font-size: 14px; }
+.next { margin: 12px 0 0 !important; padding: 10px 12px; border-left: 3px solid var(--ship); background: rgba(255, 255, 255, 0.03); border-radius: 0 12px 12px 0; font-size: 14px; }
+.next b { display: block; font: 600 11px/1.5 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ship); }
+
+.log { list-style: none; margin: 0; padding: 0; }
+.log li { display: grid; grid-template-columns: 7.4em 1fr; gap: 10px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; color: #cdd5e3; }
+.log time { font: 500 12px/1.6 var(--display); letter-spacing: 0.04em; color: var(--muted); }
+.file .warp { color: var(--cyan); font-size: 14px; }
+.fly { display: inline-block; margin: 2px 0 6px; font: 600 12px/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); text-decoration: none; padding: 6px 0; }
+.fly:hover { text-decoration: underline; text-underline-offset: 3px; }
+.file .record { color: var(--muted); font-size: 14px; font-style: italic; }
+
+.source { max-width: 760px; margin: 18px auto 0; font-size: 12px; color: var(--dim); text-align: center; }
+.missions .jd-foot { padding: 22px 0 calc(18px + var(--safe-b)); }
+
+@media (min-width: 900px) {
+  .top { padding: calc(20px + var(--safe-t)) 24px 14px; }
+  .title h1 { font-size: 26px; }
+  .missions main { padding: 0 24px; }
+  .board { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); grid-template-areas: 'map file' 'scale file' 'fleet file'; grid-template-rows: auto auto 1fr; gap: 0 24px; align-items: start; }
+  .map-wrap { grid-area: map; margin: 4px 0 0; border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
+  .scale { grid-area: scale; }
+  .fleet { grid-area: fleet; flex-wrap: wrap; overflow: visible; margin: 12px 0 0; padding: 0; }
+  .file { grid-area: file; position: sticky; top: 12px; }
+}

@@ -2,10 +2,10 @@
 // Anything the person saves lives in localStorage, not here.
 // Network first, so a new version shows up as soon as you're online.
 
-const CACHE = 'engage-v3'; // bump the number when the file list changes
+const CACHE = 'engage-v4'; // bump the number when the file list changes
 const SHELL = [
-  './', 'index.html', 'survey.html', 'maru.html', 'icon.svg', 'manifest.webmanifest',
-  'css/app.css', 'css/survey.css', 'css/maru.css', 'js/app.js', 'js/maru.js', 'js/maru-sim.js', 'js/classes.js', 'js/planet-art.js', 'js/survey.js', 'js/audio.js', 'js/catalog.js', 'js/destinations.js', 'js/log.js', 'js/physics.js', 'js/sky.js',
+  './', 'index.html', 'survey.html', 'maru.html', 'missions.html', 'icon.svg', 'manifest.webmanifest',
+  'css/app.css', 'css/survey.css', 'css/maru.css', 'css/missions.css', 'js/app.js', 'js/maru.js', 'js/maru-sim.js', 'js/missions.js', 'js/ships.js', 'js/ephemeris.js', 'js/classes.js', 'js/planet-art.js', 'js/survey.js', 'js/audio.js', 'js/catalog.js', 'js/destinations.js', 'js/log.js', 'js/physics.js', 'js/sky.js',
   'data/stars.bin', 'data/stars.json', 'img/milkyway.png',
   'fonts/chakra-petch-500.woff2', 'fonts/chakra-petch-600.woff2', 'fonts/ibm-plex-sans.woff2',
   'icon-180.png', 'icon-192.png', 'icon-512.png',
