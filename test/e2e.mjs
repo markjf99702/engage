@@ -189,6 +189,16 @@ const lit = await page.evaluate(() => {
   return s / (d.length / 4) / 3;
 });
 assert.ok(lit > 40, 'the planet is not drawn');
+// With reduced motion the globe stands still, so it isn't drawn again and again.
+await page.emulateMedia({ reducedMotion: 'reduce' });
+const redraws = await page.evaluate(() => new Promise(done => {
+  const put = CanvasRenderingContext2D.prototype.putImageData;
+  let n = 0;
+  CanvasRenderingContext2D.prototype.putImageData = function (...a) { if (this.canvas.id === 'globe') n++; return put.apply(this, a); };
+  setTimeout(() => { CanvasRenderingContext2D.prototype.putImageData = put; done(n); }, 1500);
+}));
+await page.emulateMedia({ reducedMotion: null });
+assert.ok(redraws <= 1, `the globe was drawn ${redraws} times in 1.5 seconds without moving`);
 await Promise.all([page.waitForNavigation(), page.locator('#file .fly').first().click()]);
 await bridgeReady();
 assert.equal(await text('#target-name'), 'Proxima Centauri', 'set course did not choose the star');

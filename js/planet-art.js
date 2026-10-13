@@ -466,9 +466,13 @@ export class Globe {
   }
 
   draw(turn = 0, size = this.canvas.width || 256) {
+    // Nothing to do if it hasn't turned, changed size or changed its map since last time (it stands still with reduced motion).
+    const was = this.drawn;
+    if (was && was.turn === turn && was.size === size && was.map === this.map) return;
     this.layout(size);
     const m = this.map;
     if (!m) return;
+    this.drawn = { turn, size, map: m };
     const { g, img, px, lon, lat, sun, rim, view } = this;
     const data = img.data;
     data.fill(0);
