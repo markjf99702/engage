@@ -257,6 +257,18 @@ export function jwstFromEarth(jd) {
 }
 export const jwstSpan = () => [JWST_START, JWST_START + JWST_STEP * (JWST.length - 1)];
 
+// How fast Webb goes round L2, in km/s. L2 keeps to the line from the Sun through Earth, so this watches her turning
+// with Earth (as the near-Earth map does), where L2 stands still; seen from Earth's centre alone, L2's own 0.3 km/s
+// trip round the Sun would be counted too.
+export function jwstAroundL2(jd) {
+  const turned = t => {
+    const p = jwstFromEarth(t), e = earthAt(t), a = Math.atan2(e[1], e[0]), c = Math.cos(a), s = Math.sin(a);
+    return [p[0] * c + p[1] * s, -p[0] * s + p[1] * c, p[2]];
+  };
+  const a = turned(jd), b = turned(jd + 1 / 24);
+  return Math.hypot(...b.map((v, k) => v - a[k])) / 3600;
+}
+
 // ---------- Everything a ship's file needs ----------
 
 const sub = (a, b) => a.map((v, k) => v - b[k]);

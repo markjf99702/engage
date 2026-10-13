@@ -1,7 +1,7 @@
 // The long missions' numbers, checked without a browser:  node --test test/missions.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { jdOf, dateOf, readings, stateAt, earthAt, planetAt, heading, whenAbove, jwstFromEarth, trackUntil, LIGHT_DAY_AU, AU_KM } from '../js/ephemeris.js';
+import { jdOf, dateOf, readings, stateAt, earthAt, planetAt, heading, whenAbove, jwstFromEarth, jwstAroundL2, trackUntil, LIGHT_DAY_AU, AU_KM } from '../js/ephemeris.js';
 import { SHIPS } from '../js/ships.js';
 
 const at = iso => jdOf(new Date(iso));
@@ -73,6 +73,14 @@ test('Webb is always beyond Earth, away from the Sun', () => {
     const out = (e[0] * w[0] + e[1] * w[1] + e[2] * w[2]) / Math.hypot(...e);
     assert.ok(out > 0, `Webb on the Sun's side on ${iso}`);
   }
+});
+
+test('Webb’s speed round L2 leaves out L2’s own trip round the Sun', () => {
+  // After the Horizons table she is held at the L2 point, so she isn't going round it at all, though from Earth's
+  // centre she would still seem to move 0.3 km/s: that is L2 itself, keeping to the line from the Sun through Earth.
+  assert.ok(jwstAroundL2(at('2028-06-01')) < 0.005, `${jwstAroundL2(at('2028-06-01'))} km/s parked at L2`);
+  // On 1 January 2027 she is on the quick side of her loop: 0.28 km/s round L2 (only 0.10 from Earth's centre).
+  assert.ok(Math.abs(jwstAroundL2(at('2027-01-01')) - 0.28) < 0.02, `${jwstAroundL2(at('2027-01-01'))} km/s on 1 January 2027`);
 });
 
 test('every ship has a file to read', () => {

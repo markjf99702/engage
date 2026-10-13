@@ -3,7 +3,7 @@
 import { SHIPS, byId } from './ships.js';
 import {
   AU_KM, LIGHT_DAY_AU, jdOf, dateOf, readings, trackUntil, planetAt, earthAt, semiMajor,
-  jwstFromEarth, jwstSpan, moonAt, whenAbove,
+  jwstFromEarth, jwstSpan, jwstAroundL2, moonAt, whenAbove,
 } from './ephemeris.js';
 import { warpSpeed, stardate, plural } from './physics.js';
 
@@ -165,10 +165,8 @@ function tick(force = false) {
   $('earth-km').textContent = `${int(earthKm)} km`;
   $('earth-au').textContent = ship.near ? `${(earthKm / 384400).toFixed(2)} times as far as the Moon` : `${r.earthAU.toFixed(3)} AU`;
   if (ship.near) {
-    const e0 = jwstFromEarth(jd), e1 = jwstFromEarth(jd + 1 / 24);
-    const around = Math.hypot(...e1.map((v, k) => v - e0[k])) / 3600;
     $('speed').textContent = `${r.speedKmS.toFixed(1)} km/s`;
-    $('speed-h').textContent = `round the Sun with Earth, and ${around.toFixed(2)} km/s round L2`;
+    $('speed-h').textContent = `round the Sun with Earth, and ${jwstAroundL2(jd).toFixed(2)} km/s round L2`;
   } else {
     $('speed').textContent = `${r.speedKmS.toFixed(2)} km/s`;
     $('speed-h').textContent = `${int(Math.round(r.speedKmS * 36) * 100)} km/h, relative to the Sun`;
