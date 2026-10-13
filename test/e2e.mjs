@@ -278,6 +278,16 @@ const spot = await page.evaluate(() => tonight.where('Vulcan'));
 await page.touchscreen.tap(spot.x, spot.y);
 assert.equal(await text('#card-title'), 'Vulcan', 'tapping the tag did not open Vulcan');
 assert.match(await text('#card-look'), /up in the south-east/);
+// With the card open, looking somewhere else stays put when the sky is worked out again (every 20 seconds, and
+// whenever the time slider moves), while the card keeps up.
+const lookBefore = await text('#card-look');
+await page.evaluate(() => tonight.look(60, 30));
+await page.locator('#time').evaluate(el => { el.value = 60; el.dispatchEvent(new Event('input')); });
+await page.waitForTimeout(1200);
+const looking = await page.evaluate(() => tonight.state.view);
+assert.ok(Math.abs(looking.az - 60) < 0.5 && Math.abs(looking.alt - 30) < 0.5, `the card turned the view back to its star (${looking.az}, ${looking.alt})`);
+assert.notEqual(await text('#card-look'), lookBefore, 'the card did not keep up with the sky');
+await page.locator('#time').evaluate(el => { el.value = 0; el.dispatchEvent(new Event('input')); });
 const skyLit = await page.evaluate(() => {
   const c = document.getElementById('view'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
   let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] + d[i + 1] + d[i + 2] > 300) n++;

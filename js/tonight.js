@@ -177,7 +177,7 @@ function compute() {
   sky = { date, f, sun, sunAlt, moon, moonL, moonAlt, lim, nightLim, local, lines, planets };
   updateHud();
   if (!$('list').hidden) renderList();
-  if (!$('card').hidden && sel) showCard(sel);
+  if (!$('card').hidden && sel) fillCard(sel); // keeps the card up to date without turning the view back to it
   dirty = true;
 }
 
@@ -553,6 +553,14 @@ function nameOf(s) {
 // ---------- The card ----------
 
 function showCard(s) {
+  fillCard(s);
+  openSheet('card');
+  frameAboveCard();
+  dirty = true;
+}
+
+// Writes the card for something in the sky. The card is read out as it changes, so only what moved is rewritten.
+function fillCard(s) {
   sel = s;
   const local = selLocal(s);
   const pos = altAz(local);
@@ -577,7 +585,7 @@ function showCard(s) {
     const left = new Date().getFullYear() - ly;
     facts = `${d?.kind || describeKind(cat.spect[s.i], cat.temp[s.i])}. The light reaching you tonight left it ${ly < 5000 ? `in ${formatYear(left)}` : `about ${formatLy(ly).replace(' ly', '')} years ago`}.`;
     course.href = `${BRIDGE}?course=${encodeURIComponent(cat.names[s.i])}`;
-    course.textContent = `Set course for ${titleFor(cat, s.i)}`;
+    setText('card-course', `Set course for ${titleFor(cat, s.i)}`);
     if (BRIDGE.startsWith('http')) { course.target = '_blank'; course.rel = 'noopener'; }
   } else if (s.kind === 'planet') {
     const p = sky.planets.find(x => x.name === s.name);
@@ -595,18 +603,16 @@ function showCard(s) {
     kind = 'Sol'; title = 'The Sun'; sub = '8 light minutes away';
     line = 'Home. Don’t look straight at it.';
   }
-  $('card-kind').textContent = kind;
-  $('card-title').textContent = title;
-  $('card-sub').textContent = sub;
-  $('card-look').textContent = `${cap(look)}${s.kind === 'star' && pos.alt > -0.5 ? '. ' + seeIt : '.'}`;
-  $('card-line').textContent = line;
+  setText('card-kind', kind);
+  setText('card-title', title);
+  setText('card-sub', sub);
+  setText('card-look', `${cap(look)}${s.kind === 'star' && pos.alt > -0.5 ? '. ' + seeIt : '.'}`);
+  setText('card-line', line);
   $('card-line').hidden = !line;
-  $('card-facts').textContent = facts;
+  setText('card-facts', facts);
   $('card-facts').hidden = !facts;
-  openSheet('card');
-  frameAboveCard();
-  dirty = true;
 }
+const setText = (id, text) => { if ($(id).textContent !== text) $(id).textContent = text; };
 
 // With the card up, turn the view (when looking by hand) so the thing sits in the sky that's left above it.
 function frameAboveCard() {
