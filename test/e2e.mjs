@@ -312,6 +312,25 @@ await page.reload();
 assert.ok(await page.title(), 'the page did not load offline');
 await ctx.setOffline(false);
 
+// Every tool at junkdrawer.works/ shares one address, and with it one place for offline copies. When Engage's
+// service worker starts, it clears out Engage's own old copy and leaves other tools' alone. Both are made first,
+// on a page of the site that doesn't start the service worker.
+{
+  const shared = await browser.newContext();
+  const p = await shared.newPage();
+  await p.goto(base + 'icon.svg');
+  await p.evaluate(async () => {
+    await (await caches.open('another-tool-v1')).put('another-tool/', new Response('another tool'));
+    await (await caches.open('engage-v1')).put('index.html', new Response('an old Engage'));
+  });
+  await p.goto(base);
+  await p.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 30000 });
+  const has = name => p.evaluate(n => caches.has(n), name);
+  assert.equal(await has('another-tool-v1'), true, 'starting up deleted another tool’s offline copy');
+  assert.equal(await has('engage-v1'), false, 'starting up left an old offline copy of Engage behind');
+  await shared.close();
+}
+
 assert.deepEqual(problems.filter(p => !p.startsWith('failed:')), [], 'problems while using it');
 await browser.close();
 server.close();

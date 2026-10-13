@@ -2,7 +2,7 @@
 // Anything the person saves lives in localStorage, not here.
 // Network first, so a new version shows up as soon as you're online.
 
-const CACHE = 'engage-v5'; // bump the number when the file list changes
+const CACHE = 'engage-v6'; // bump the number when the file list changes
 const SHELL = [
   './', 'index.html', 'survey.html', 'maru.html', 'missions.html', 'tonight.html', 'icon.svg', 'manifest.webmanifest',
   'css/app.css', 'css/survey.css', 'css/maru.css', 'css/missions.css', 'css/tonight.css', 'js/app.js', 'js/maru.js', 'js/maru-sim.js', 'js/missions.js', 'js/tonight.js', 'js/astro.js', 'js/charts.js', 'js/ships.js', 'js/ephemeris.js', 'js/classes.js', 'js/planet-art.js', 'js/survey.js', 'js/audio.js', 'js/catalog.js', 'js/destinations.js', 'js/log.js', 'js/physics.js', 'js/sky.js',
@@ -16,8 +16,9 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
+  // The other tools at junkdrawer.works/ share this address and keep their copies here too, so only clear out Engage's.
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => k.startsWith('engage-') && k !== CACHE).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 
