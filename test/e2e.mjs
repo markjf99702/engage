@@ -113,6 +113,17 @@ assert.equal(await shown('#intro'), false);
 // Fits a phone: nothing scrolls sideways.
 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'the page scrolls sideways on a phone');
 
+// If the star charts can't be fetched, the bridge says so rather than charting forever.
+{
+  const cut = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await cut.route('**/data/stars.bin', r => r.abort());
+  const p = await cut.newPage();
+  await p.goto(base);
+  const said = await p.waitForFunction(() => document.getElementById('loading').textContent.includes('Couldn’t chart the stars'), null, { timeout: 15000 }).then(() => true, () => false);
+  assert.ok(said, 'the bridge kept charting after the star data failed to load');
+  await cut.close();
+}
+
 // If the graphics reset mid-flight, the viewscreen comes back instead of staying blank.
 const brightness = async () => {
   const png = (await page.screenshot({ clip: { x: 20, y: 160, width: 350, height: 200 } })).toString('base64');

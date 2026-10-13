@@ -59,7 +59,12 @@ const lyFromShip = i => cat.distanceFrom(i, camAbs()) * LY_PER_PC;
 async function start() {
   const img = new Image();
   img.src = 'img/milkyway.png';
-  [cat] = await Promise.all([loadCatalog(), img.decode()]);
+  try {
+    [cat] = await Promise.all([loadCatalog(), img.decode()]);
+  } catch (e) {
+    $('loading').textContent = 'Couldn’t chart the stars. Try reloading.';
+    throw e;
+  }
   load();
   sound.on = state.opts.sound;
   try {
