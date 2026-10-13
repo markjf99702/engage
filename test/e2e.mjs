@@ -335,6 +335,20 @@ assert.equal(await shown('#daylight'), true, 'no daylight notice at noon');
 await page.click('#go-dark');
 assert.ok(await page.evaluate(() => tonight.state.sunAlt) < -11, 'show tonight did not move to the dark');
 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'tonight’s sky scrolls sideways on a phone');
+
+// Away from the listed cities, the place is guessed from the time zone's standard time, not summer time: in July,
+// Amsterdam's clocks are two hours ahead of UTC, but its zone is the one an hour ahead, 15° east.
+{
+  const summer = await browser.newContext({ viewport: { width: 390, height: 844 }, timezoneId: 'Europe/Amsterdam' });
+  const p = await summer.newPage();
+  await p.clock.setFixedTime(new Date('2026-07-01T21:00:00Z'));
+  await p.goto(base + 'tonight.html');
+  await p.waitForFunction(() => window.tonight);
+  const guess = await p.evaluate(() => tonight.state.place);
+  assert.equal(guess.how, 'guess');
+  assert.equal(guess.lon, 15, `guessed ${guess.lon}° from Amsterdam’s time zone in summer`);
+  await summer.close();
+}
 await page.evaluate(() => { tonight.at('2026-10-11T04:30:00Z'); tonight.aimAt('Vulcan'); });
 await page.waitForTimeout(200);
 const v2 = await page.evaluate(() => tonight.where('Vulcan'));

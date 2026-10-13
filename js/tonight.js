@@ -114,7 +114,9 @@ function guessPlace() {
   try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch { /* none */ }
   const city = CITIES.find(c => c.tz === tz);
   if (city) return { name: city.name, lat: city.lat, lon: city.lon, tz, how: 'guess' };
-  const lon = -new Date().getTimezoneOffset() / 4;
+  // Each hour of a zone's standard time is 15° of longitude. Summer time runs an hour ahead, so go by whichever of January and July is behind.
+  const y = new Date().getFullYear();
+  const lon = -Math.max(new Date(y, 0, 1).getTimezoneOffset(), new Date(y, 6, 1).getTimezoneOffset()) / 4;
   const south = /^(Australia|Antarctica|Pacific\/(Auckland|Fiji)|America\/(Argentina|Santiago|Sao_Paulo|Montevideo))/.test(tz);
   return { name: 'your time zone', lat: south ? -33 : 40, lon, tz, how: 'guess' };
 }
