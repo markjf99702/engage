@@ -37,9 +37,12 @@ await page.evaluate(() => document.fonts.ready);
 
 const text = sel => page.locator(sel).innerText();
 const shown = sel => page.locator(sel).evaluate(el => !el.hidden);
+// The bridge is ready once its hooks are there. window.engage on its own is no sign: before the app starts, the
+// browser hands back the Engage button under that name, because of its id.
+const bridgeReady = (p = page) => p.waitForFunction(() => typeof window.engage?.jump === 'function', null, { timeout: 30000 });
 
 // First visit: the welcome card, then the bridge at Earth.
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 assert.ok(await shown('#intro'), 'no welcome card on a first visit');
 await page.click('#intro-go');
 assert.equal(await shown('#intro'), false);
@@ -82,7 +85,7 @@ assert.ok(Math.abs(sun[1] - 60.8 * Math.PI / 180) < 0.1, 'the view did not turn 
 await page.click('#open-log');
 assert.match(await text('#stats'), /1 star visited · 4\.2\d ly traveled/);
 await page.reload();
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 assert.equal(await text('#where'), 'Proxima Centauri', 'the ship forgot where it was');
 assert.equal(await shown('#intro'), false);
 
@@ -120,7 +123,7 @@ await loseGraphics();
 await page.waitForTimeout(3000);
 assert.ok(await shown('#lost'), 'no way out of a blank viewscreen');
 await Promise.all([page.waitForNavigation(), page.click('#lost-reload')]);
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 assert.equal(await text('#where'), 'Wolf 359');
 assert.equal(await shown('#lost'), false);
 
@@ -143,7 +146,7 @@ const lit = await page.evaluate(() => {
 });
 assert.ok(lit > 40, 'the planet is not drawn');
 await Promise.all([page.waitForNavigation(), page.locator('#file .fly').first().click()]);
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 assert.equal(await text('#target-name'), 'Proxima Centauri', 'set course did not choose the star');
 assert.equal(new URL(page.url()).search, '', 'the course link stayed in the address');
 
@@ -164,7 +167,7 @@ assert.equal(await shown('#files'), true, 'reading the file did not open it');
 assert.equal(await page.evaluate(() => location.hash.slice(1)), world);
 // The Kobayashi Maru: reached from the bridge, played to the end, graded and remembered.
 await page.goto(base);
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 await Promise.all([page.waitForNavigation(), page.click('#open-maru')]);
 await page.waitForFunction(() => window.maru);
 assert.equal(await shown('#brief'), true);
@@ -199,7 +202,7 @@ await page.click('#read-eval');
 assert.equal(await text('#eval-title'), 'Changed the rules');
 // Long missions: reached from the bridge, the ships on file, a hail sent, and a course set for where one is bound.
 await page.goto(base);
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 await Promise.all([page.waitForNavigation(), page.click('#open-missions')]);
 await page.waitForFunction(() => window.missions);
 assert.equal(await text('#ship-name'), 'Voyager 1');
@@ -222,12 +225,12 @@ const mapLit = await page.evaluate(() => {
 assert.ok(mapLit > 5000, 'the map is not drawn');
 await page.locator('.ship-tab[data-id="v2"]').click();
 await Promise.all([page.waitForNavigation(), page.click('#ship-course')]);
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose the star Voyager 2 is bound for');
 
 // Tonight's sky: reached from the bridge, the stars tagged where they really are, a tap on Vulcan, and a course set.
 await page.goto(base);
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 await Promise.all([page.waitForNavigation(), page.click('#open-sky')]);
 await page.waitForFunction(() => window.tonight);
 await page.evaluate(() => { tonight.place(40.71, -74.01, 'New York', 'America/New_York'); tonight.at('2026-10-11T04:30:00Z'); });
@@ -275,11 +278,11 @@ await page.waitForTimeout(200);
 const v2 = await page.evaluate(() => tonight.where('Vulcan'));
 await page.touchscreen.tap(v2.x, v2.y);
 await Promise.all([page.waitForNavigation(), page.click('#card-course')]);
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 assert.equal(await text('#target-name'), '40 Eridani', 'set course did not choose Vulcan’s sun');
 
 await page.goto(base);
-await page.waitForFunction(() => window.engage);
+await bridgeReady();
 
 // Works offline once it has been opened.
 await page.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 10000 }).catch(() => {});

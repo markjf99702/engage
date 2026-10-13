@@ -36,7 +36,7 @@ async function open(viewport, deviceScaleFactor) {
     localStorage.setItem('engage.v1', JSON.stringify({ seenIntro: true }));
   }, SEED);
   await page.goto(base);
-  await page.waitForFunction(() => window.engage);
+  await page.waitForFunction(() => typeof window.engage?.jump === 'function'); // not just the Engage button, by its id
   await page.evaluate(() => document.fonts.ready);
   return page;
 }
@@ -53,7 +53,7 @@ if (!only) {
   await page.screenshot({ path: join(root, 'docs/phone-warp.png') });
 
   await page.reload();
-  await page.waitForFunction(() => window.engage);
+  await page.waitForFunction(() => typeof window.engage?.jump === 'function'); // not just the Engage button, by its id
   await page.evaluate(() => { engage.speed(10); engage.target('Proxima Centauri'); });
   await page.click('#engage');
   await page.waitForFunction(() => !document.getElementById('arrival').hidden, null, { timeout: 20000 });
