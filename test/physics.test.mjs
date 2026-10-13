@@ -36,6 +36,18 @@ test('trip times read sensibly', () => {
   assert.equal(formatYear(-470), '471 BCE');
 });
 
+test('trip times round before they pick a unit', () => {
+  const hours = h => h / 8766;
+  assert.equal(formatDuration(tripYears(8.6, 9.1)), '2 days'); // Sirius at warp 9.1: 47.7 hours
+  assert.equal(formatDuration(hours(47.6)), '2 days');
+  assert.equal(formatDuration(hours(30)), '1 day 6 hours');
+  assert.equal(formatDuration(hours(24.4)), '1 day');
+  assert.equal(formatDuration(hours(23.6)), '1 day');
+  assert.equal(formatDuration(hours(0.995)), '1 hour');
+  assert.equal(formatDuration(59.7 / 365.25), '2 months');
+  assert.equal(formatDuration(1.99), '2 years');
+});
+
 test('the Sun comes out like the Sun', () => {
   const sun = physical(4.83, 0.656);
   assert.ok(Math.abs(sun.temp - 5772) < 100);

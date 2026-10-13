@@ -76,12 +76,16 @@ export function holdDistanceAU(radiusSun) {
 export function formatDuration(years) {
   const hours = years * 8766;
   if (hours < 1 / 60) return 'under a minute';
-  if (hours < 1) return plural(Math.round(hours * 60), 'minute');
-  if (hours < 24) return plural(Math.round(hours), 'hour');
-  const days = hours / 24;
-  if (days < 2) { const h = Math.round(hours - 24); return h ? `1 day ${plural(h, 'hour')}` : '1 day'; }
-  if (days < 60) return plural(Math.round(days), 'day');
-  if (years < 2) return plural(Math.round(days / 30.44), 'month');
+  // Round first, then pick the unit, so 47.6 hours reads as 2 days rather than 1 day 24 hours.
+  const minutes = Math.round(hours * 60);
+  if (minutes < 60) return plural(minutes, 'minute');
+  const h = Math.round(hours);
+  if (h < 24) return plural(h, 'hour');
+  if (h < 48) return h > 24 ? `1 day ${plural(h - 24, 'hour')}` : '1 day';
+  const days = Math.round(hours / 24);
+  if (days < 60) return plural(days, 'day');
+  const months = Math.round(hours / 24 / 30.44);
+  if (months < 24) return plural(months, 'month');
   if (years < 100) return plural(Math.round(years), 'year');
   return `${round(years).toLocaleString('en-US')} years`;
 }
