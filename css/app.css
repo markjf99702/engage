@@ -154,7 +154,7 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 
 .about p { margin: 0 0 10px; }
 .text-button { background: none; border: 0; padding: 8px 0; color: var(--amber); text-decoration: underline; text-underline-offset: 3px; }
 
-.intro { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: radial-gradient(ellipse at 50% 60%, rgba(5, 7, 13, 0.35), rgba(5, 7, 13, 0.85)); }
+.intro { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; overflow-y: auto; overscroll-behavior: contain; background: radial-gradient(ellipse at 50% 60%, rgba(5, 7, 13, 0.35), rgba(5, 7, 13, 0.85)); }
 .intro-card { max-width: 400px; padding: 24px 22px 14px; border-radius: 22px; background: var(--panel); border: 1px solid var(--line-strong); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
 .intro-card h2 { margin: 4px 0 10px; font: 600 40px/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; }
 .intro-card p { color: #cdd5e3; margin: 0 0 12px; }

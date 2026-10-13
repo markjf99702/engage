@@ -49,6 +49,27 @@ assert.equal(await shown('#intro'), false);
 assert.equal(await text('#where'), 'Earth orbit');
 assert.ok(await page.locator('#engage').isDisabled(), 'engage works with no destination');
 
+// On a small phone, or any phone turned on its side, the welcome card is taller than the screen, so it scrolls and
+// Take the helm can still be reached.
+for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }]) {
+  const small = await browser.newContext({ viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const p = await small.newPage();
+  p.on('pageerror', e => problems.push(e.message));
+  await p.goto(base);
+  await bridgeReady(p);
+  const touch = await small.newCDPSession(p);
+  const x = viewport.width / 2, from = viewport.height - 40, to = 40;
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: from }] });
+  for (let i = 1; i <= 10; i++) await touch.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x, y: from + (to - from) * i / 10 }] });
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await p.waitForTimeout(600);
+  const go = await p.locator('#intro-go').boundingBox();
+  assert.ok(go.y + go.height <= viewport.height, `Take the helm is below the bottom of a ${viewport.width}×${viewport.height} screen`);
+  await p.touchscreen.tap(go.x + go.width / 2, go.y + go.height / 2);
+  assert.equal(await p.locator('#intro').evaluate(el => el.hidden), true, `the welcome card stayed up on a ${viewport.width}×${viewport.height} screen`);
+  await small.close();
+}
+
 // Tapping a star chooses it.
 await page.evaluate(() => engage.lookAtStar('Sirius'));
 await page.waitForTimeout(400);
