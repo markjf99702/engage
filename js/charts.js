@@ -12,7 +12,7 @@ export const CHARTS = [
   { star: 'Deneb', tag: 'Farpoint', line: 'Farpoint Station stood on Deneb IV, where the Enterprise-D met Q on her first mission, in Encounter at Farpoint.' },
   { star: 'Capella', tag: 'Capella IV', line: 'Kirk bargained for mining rights with the warrior Capellans on Capella IV, in Friday’s Child.' },
   { star: 'Pollux', tag: 'Pollux IV', line: 'The being who had been the god Apollo held the Enterprise in his hand over Pollux IV, in Who Mourns for Adonais?' },
-  { star: 'Aldebaran', tag: 'Aldebaran whiskey', line: 'Guinan poured Scotty a glass of it from her private stock, in Relics. “It’s green.”' },
+  { star: 'Aldebaran', tag: 'Aldebaran whiskey', line: 'Data poured Scotty a glass of it from Guinan’s private stock, in Relics. “It is green.”' },
   { star: 'Antares', tag: 'Antares', line: 'Charlie Evans came aboard the Enterprise from the ship Antares, in Charlie X.' },
   { star: 'Procyon', tag: 'Procyon V', line: 'In Enterprise, Daniels showed Archer the Battle of Procyon V, fought centuries in the future.' },
   { star: '61 Cygni', tag: 'Tellar', line: 'Star Trek: Star Charts puts Tellar Prime, home of the argumentative Tellarites, at 61 Cygni.' },

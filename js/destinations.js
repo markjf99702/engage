@@ -43,7 +43,7 @@ export const DESTINATIONS = [
     planets: 'Four small rocky planets, all lighter than Earth, confirmed in 2024 and 2025. They circle it in two to seven days.',
     notes: [
       'It moves across Earth’s sky faster than any other star, about the width of the Moon every 180 years.',
-      'It is heading our way and will be the closest star to the Sun in about 10,000 years.',
+      'It is heading our way and will come within 3.8 light years of the Sun in about 10,000 years, though Proxima Centauri will be closer still.',
       'At around 10 billion years old, it is more than twice the Sun’s age.',
     ],
     fiction: 'The target of Project Daedalus, a 1970s study of an uncrewed starship.',
@@ -155,7 +155,7 @@ export const DESTINATIONS = [
     kind: 'Orange dwarf, spectral type K0, with two companions', temp: 5126, lum: 0.46, radius: 0.81,
     planets: 'A planet claimed in 2018 turned out to be the star’s own activity.',
     notes: [
-      'A triple: an orange star like this one, a white dwarf and a red dwarf. The white dwarf is the easiest to see from Earth, in a small telescope.',
+      'A triple: an orange star like this one, a white dwarf and a red dwarf. The white dwarf is the easiest of all white dwarfs to see from Earth, in a small telescope.',
     ],
     fiction: 'Vulcan’s sun. Gene Roddenberry and three astronomers named it in a 1991 letter to Sky & Telescope.',
   },

@@ -134,7 +134,7 @@ export const CLASSES = [
     worlds: [
       { name: 'Epsilon Indi Ab', star: 'ε Indi', ly: 12, note: 'About six times Jupiter’s mass and only a few degrees above freezing. Webb photographed it directly in 2024.' },
       { name: 'Beta Pictoris b', star: 'β Pictoris', ly: 63, note: 'About ten times Jupiter’s mass and still hot from forming, inside a huge disc of dust.' },
-      { name: 'HR 8799 b, c, d and e', star: 'HIP 114189', ly: 133, note: 'Four super-Jupiters, photographed together in 2008: the first family of planets ever seen directly.' },
+      { name: 'HR 8799 b, c, d and e', star: 'HIP 114189', ly: 133, note: 'Four super-Jupiters, the first three photographed together in 2008: the first family of planets ever seen directly.' },
     ],
   },
   {
