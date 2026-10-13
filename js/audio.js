@@ -78,7 +78,7 @@ export const sound = {
     o2.connect(lp);
     lp.connect(og).connect(master);
     for (const x of [o, o2]) { x.start(t); x.stop(t + seconds + 1.3); }
-    hum = { o, o2, og };
+    hum = { o, o2, og, ng };
   },
 
   // Dropping out of warp: a falling whoosh.
@@ -198,8 +198,7 @@ export const sound = {
   stop() {
     if (hum && ctx) {
       const t = ctx.currentTime;
-      hum.og.gain.cancelScheduledValues(t);
-      hum.og.gain.setValueAtTime(0.0001, t);
+      for (const g of [hum.og, hum.ng]) { g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(0.0001, t); }
       hum = null;
     }
     if (ctx) master.gain.setValueAtTime(this.on ? 0.5 : 0, ctx.currentTime);

@@ -609,6 +609,13 @@ function bind() {
     }
     delete b.dataset.armed;
     b.textContent = 'Clear the log and return to Earth';
+    if (trip) { // a flight under way ends here too, back at Earth
+      trip = null;
+      $('readout').hidden = true;
+      $('console').classList.remove('away');
+      sound.stop();
+    }
+    turn = null;
     const keep = { opts: state.opts, seenIntro: true, warp: state.warp };
     Object.assign(state, defaults(), keep);
     sky.setOrigin(starPos(0));

@@ -159,6 +159,18 @@ await bridgeReady();
 assert.equal(await text('#where'), 'Wolf 359');
 assert.equal(await shown('#lost'), false);
 
+// Clearing the log mid-flight takes the ship straight home: the flight ends there too.
+await page.evaluate(() => { engage.speed(1); engage.target('Deneb'); });
+await page.click('#engage');
+await page.waitForFunction(() => engage.trip?.phase === 'cruise', null, { timeout: 20000 });
+await page.click('#open-settings');
+await page.click('#clear-log');
+await page.click('#clear-log');
+assert.equal(await page.evaluate(() => !!engage.trip), false, 'the ship flew on after the log was cleared');
+assert.equal(await text('#where'), 'Earth orbit');
+assert.equal(await shown('#readout'), false);
+assert.equal(await page.evaluate(() => engage.state.log.length), 0);
+
 // The planetary survey: flip through the files, set course from one, and play the drill.
 await page.goto(base + 'survey.html#K');
 await page.waitForFunction(() => window.survey);
