@@ -180,6 +180,7 @@ assert.match(await text('#file h2'), /Class H/);
 assert.equal(new URL(page.url()).hash, '#H');
 await page.locator('#strip .chip').nth(0).click();
 assert.match(await text('#file h2'), /Class M/);
+assert.equal(await page.getByRole('button', { name: 'Class M: Earth-like' }).count(), 1, 'the thumbnails are not buttons to a screen reader');
 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'the survey scrolls sideways on a phone');
 await page.waitForTimeout(1500); // the sharp map paints in the background
 const lit = await page.evaluate(() => {

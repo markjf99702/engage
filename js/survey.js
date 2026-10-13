@@ -140,9 +140,9 @@ function buildStrip() {
   const strip = $('strip');
   let html = '';
   order.forEach((c, k) => {
-    if (k === 0) html += '<p class="strip-group" role="presentation">Starfleet</p>';
-    if (!c.letter && order[k - 1]?.letter) html += '<p class="strip-group" role="presentation">Real, unnamed</p>';
-    html += `<button class="chip" type="button" role="listitem" data-i="${k}" aria-label="${esc(label(c))}: ${esc(c.short)}">
+    if (k === 0) html += '<p class="strip-group">Starfleet</p>';
+    if (!c.letter && order[k - 1]?.letter) html += '<p class="strip-group">Real, unnamed</p>';
+    html += `<button class="chip" type="button" data-i="${k}" aria-label="${esc(label(c))}: ${esc(c.short)}">
       <canvas width="96" height="96" aria-hidden="true"></canvas><span>${esc(c.letter || c.name)}</span></button>`;
   });
   strip.innerHTML = html;
