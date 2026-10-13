@@ -14,6 +14,7 @@ const KEY = 'engage.v1';
 const SURVEY = 'survey.html';
 const AWAY = SURVEY.startsWith('http') ? ' target="_blank" rel="noopener"' : '';
 const $ = id => document.getElementById(id);
+const still = matchMedia('(prefers-reduced-motion: reduce)');
 const DEG = Math.PI / 180;
 const START_YAW = 83 * DEG, START_PITCH = 3 * DEG; // facing Orion, with the Sun behind
 const GREEK = { α: 'alpha', β: 'beta', γ: 'gamma', δ: 'delta', ε: 'epsilon', ζ: 'zeta', η: 'eta', θ: 'theta', ι: 'iota', κ: 'kappa', λ: 'lambda', μ: 'mu', ν: 'nu', ξ: 'xi', ο: 'omicron', π: 'pi', ρ: 'rho', σ: 'sigma', τ: 'tau', υ: 'upsilon', φ: 'phi', χ: 'chi', ψ: 'psi', ω: 'omega' };
@@ -432,6 +433,7 @@ function arrive() {
 }
 
 function flash(strength) {
+  if (still.matches) return; // a white flash over the whole screen is just what reduced motion asks to skip
   $('flash').animate([{ opacity: 0 }, { opacity: strength, offset: 0.25 }, { opacity: 0 }], { duration: 700, easing: 'ease-out' });
 }
 
@@ -501,7 +503,7 @@ function entryHtml(e, heading) {
   parts.push(`<p class="intro-line">${esc(e.intro)}</p><dl>`);
   let delay = 0;
   for (const [label, text] of e.sections) {
-    const style = heading ? ` style="animation: rise .5s ${(delay += 0.12).toFixed(2)}s both"` : '';
+    const style = heading && !still.matches ? ` style="animation: rise .5s ${(delay += 0.12).toFixed(2)}s both"` : '';
     if (label) parts.push(`<dt${style}>${esc(label)}</dt>`);
     parts.push(`<dd class="${label ? (label === 'Looking home' ? 'home' : '') : 'note'}"${style}>${esc(text)}</dd>`);
     if (label === 'Planets') parts.push(surveyLinks(e.star, style));

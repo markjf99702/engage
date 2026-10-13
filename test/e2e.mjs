@@ -413,6 +413,20 @@ assert.equal(await text('#target-name'), '40 Eridani', 'set course did not choos
 await page.goto(base);
 await bridgeReady();
 
+// With reduced motion, warp doesn't flash the screen white and the log doesn't animate in.
+await page.emulateMedia({ reducedMotion: 'reduce' });
+await page.evaluate(() => {
+  const el = document.getElementById('flash'), animate = el.animate.bind(el);
+  window.flashes = 0;
+  el.animate = (...a) => { window.flashes++; return animate(...a); };
+  engage.speed(8); engage.target('Vega');
+});
+await page.click('#engage');
+await page.waitForFunction(() => !document.getElementById('arrival').hidden, null, { timeout: 20000 });
+assert.equal(await page.evaluate(() => window.flashes), 0, 'warp flashed the screen with reduced motion on');
+assert.equal(await page.locator('#arrival-entry [style*="animation"]').count(), 0, 'the log animated in with reduced motion on');
+await page.emulateMedia({ reducedMotion: null });
+
 // Works offline once it has been opened.
 await page.waitForFunction(() => navigator.serviceWorker?.controller, null, { timeout: 10000 }).catch(() => {});
 await ctx.setOffline(true);
