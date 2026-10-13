@@ -261,6 +261,14 @@ assert.match(await text('#signal'), /seconds/);
 await page.click('#view-sun');
 assert.equal(await page.evaluate(() => missions.sel), 'v1');
 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'long missions scrolls sideways on a phone');
+// The numbers tick over ten times a second, so they aren't in a part of the page that's read out as it changes.
+const chatter = await page.evaluate(() => new Promise(done => {
+  let changes = 0;
+  const watch = new MutationObserver(list => { changes += list.length; });
+  for (const el of document.querySelectorAll('[aria-live]:not([aria-live="off"])')) watch.observe(el, { subtree: true, childList: true, characterData: true });
+  setTimeout(() => { watch.disconnect(); done(changes); }, 1000);
+}));
+assert.equal(chatter, 0, 'screen readers would read out the ticking numbers');
 const mapLit = await page.evaluate(() => {
   const c = document.getElementById('map'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
   let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 0) n++;
