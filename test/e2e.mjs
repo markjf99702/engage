@@ -400,6 +400,15 @@ assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= i
   const guess = await p.evaluate(() => tonight.state.place);
   assert.equal(guess.how, 'guess');
   assert.equal(guess.lon, 15, `guessed ${guess.lon}° from Amsterdam’s time zone in summer`);
+  // A guess saved the old way, from summer time, is made again; a city picked by hand is kept.
+  await p.evaluate(() => localStorage.setItem('engage.tonight.v1', JSON.stringify({ place: { name: 'your time zone', lat: 40, lon: 30, tz: 'Europe/Amsterdam', how: 'guess' }, sky: 'dark' })));
+  await p.reload();
+  await p.waitForFunction(() => window.tonight);
+  assert.equal(await p.evaluate(() => tonight.state.place.lon), 15, 'an old guess made from summer time was kept');
+  await p.evaluate(() => tonight.place(48.86, 2.35, 'Paris', 'Europe/Paris'));
+  await p.reload();
+  await p.waitForFunction(() => window.tonight);
+  assert.equal(await p.evaluate(() => tonight.state.place.name), 'Paris', 'the city picked by hand was guessed over');
   await summer.close();
 }
 await page.evaluate(() => { tonight.at('2026-10-11T04:30:00Z'); tonight.aimAt('Vulcan'); });

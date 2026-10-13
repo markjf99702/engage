@@ -73,7 +73,8 @@ async function start() {
   cat = await loadCatalog();
   canvas = $('view');
   ctx = canvas.getContext('2d');
-  if (!saved.place) saved.place = guessPlace();
+  // A guess is saved along with everything else, but it's still only a guess: make it afresh from today's time zone.
+  if (!saved.place || saved.place.how === 'guess') saved.place = guessPlace();
   prepareStars();
   buildSheets();
   document.body.classList.toggle('red', !!saved.night);
