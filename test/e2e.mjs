@@ -238,6 +238,7 @@ await bridgeReady();
 await Promise.all([page.waitForNavigation(), page.click('#open-maru')]);
 await page.waitForFunction(() => window.maru);
 assert.equal(await shown('#brief'), true);
+assert.deepEqual(await page.locator('.jd-foot a').allInnerTexts(), ['Part of junkdrawer.works', 'Privacy', 'Engage'], 'the footer’s own link comes before the drawer’s');
 assert.equal(await shown('#rewrite'), false, 'the simulator can be reprogrammed before taking the test');
 await page.click('#start');
 const order = async id => {
