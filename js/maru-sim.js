@@ -141,16 +141,15 @@ export function act(g, id) {
     if (g.hull < WARP_HULL) { g.flags.warpDown = true; say('Engineering', 'Warp drive is offline. We’re not going anywhere, Captain.', 'bad'); }
     else {
       if (!g.rewritten) volley(g, { parting: true, evading: false, shieldsDown: false }, events, say);
-      if (g.hull > 0) {
-        g.over = 'warp';
-        events.push({ type: 'warp' });
-        say('Helm', g.aboard ? `Warp 8 out of the Neutral Zone with ${g.aboard} of the Maru’s people aboard.` : 'Warp 8 out of the Neutral Zone.');
-        if (!g.maru.gone && g.maru.aboard) {
-          g.maru.gone = true; g.maru.lostTurn = g.turn;
-          if (!g.rewritten) say('Communications', `The Maru is breaking up behind us, with ${g.maru.aboard} still aboard.`, 'bad');
-        }
-        if (g.rewritten && g.maru.aboard) g.maru.aboard = 0;
+      if (g.hull <= 0) return destroyed(g, events, lines, say); // the parting volley can finish her before she jumps
+      g.over = 'warp';
+      events.push({ type: 'warp' });
+      say('Helm', g.aboard ? `Warp 8 out of the Neutral Zone with ${g.aboard} of the Maru’s people aboard.` : 'Warp 8 out of the Neutral Zone.');
+      if (!g.maru.gone && g.maru.aboard) {
+        g.maru.gone = true; g.maru.lostTurn = g.turn;
+        if (!g.rewritten) say('Communications', `The Maru is breaking up behind us, with ${g.maru.aboard} still aboard.`, 'bad');
       }
+      if (g.rewritten && g.maru.aboard) g.maru.aboard = 0;
       return { events, lines };
     }
   } else if (id === 'surrender') {
@@ -172,13 +171,7 @@ export function act(g, id) {
   if (!g.maru.gone && !g.rewritten) lifeSupport(g, LIFE_SUPPORT_NEAR, say);
   if (!hold && !g.rewritten) volley(g, { evading, shieldsDown }, events, say);
   if (shieldsDown && !hold && !g.rewritten) g.flags.beamedUnderFire++;
-  if (g.hull <= 0) {
-    g.hull = 0; g.over = 'destroyed';
-    events.push({ type: 'destroyed' });
-    say('Computer', 'Warp core breach.', 'bad');
-    if (!g.maru.gone) { g.maru.gone = true; g.maru.lostTurn = g.turn; }
-    return { events, lines };
-  }
+  if (g.hull <= 0) return destroyed(g, events, lines, say);
   if (g.hull < WARP_HULL && !g.flags.warpDown) { g.flags.warpDown = true; say('Engineering', 'We’ve lost the warp drive!', 'bad'); }
 
   // The Klingons go for the Maru from the second turn alongside. She can take three volleys.
@@ -197,6 +190,14 @@ export function act(g, id) {
     decloak(g, n, events);
     say('Tactical', n === 1 ? 'Another cruiser decloaking.' : 'Two more cruisers decloaking.', 'bad');
   }
+  return { events, lines };
+}
+
+function destroyed(g, events, lines, say) {
+  g.hull = 0; g.over = 'destroyed';
+  events.push({ type: 'destroyed' });
+  say('Computer', 'Warp core breach.', 'bad');
+  if (!g.maru.gone) { g.maru.gone = true; g.maru.lostTurn = g.turn; }
   return { events, lines };
 }
 

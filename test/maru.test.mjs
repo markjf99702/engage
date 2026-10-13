@@ -77,6 +77,21 @@ test('firing first is graded as starting a war', () => {
   assert.equal(e.grades.find(x => x.name === 'Restraint').letter, 'F');
 });
 
+test('a parting volley that destroys the ship ends the simulation', () => {
+  for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+    const g = newGame({ seed });
+    for (const id of ['enter', 'hail', 'evade', 'evade', 'evade', 'evade', 'evade']) act(g, id);
+    assert.ok(g.hull >= WARP_HULL, `seed ${seed}: the warp drive was already gone`);
+    const { events, lines } = act(g, 'warp');
+    assert.equal(g.hull, 0, `seed ${seed}: the parting volley left the hull at ${g.hull}%`);
+    assert.equal(g.over, 'destroyed', `seed ${seed}: the simulation went on at 0% hull`);
+    assert.deepEqual(orders(g), []);
+    assert.ok(events.some(e => e.type === 'destroyed'));
+    assert.match(lines.at(-1).text, /Warp core breach/);
+    assert.equal(evaluate(g).numbers.crew, 0);
+  }
+});
+
 test('surrender is always refused', () => {
   const g = play(['enter', 'surrender']);
   assert.ok(g.flags.surrendered);
