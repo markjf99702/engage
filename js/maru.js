@@ -9,7 +9,12 @@ const still = matchMedia('(prefers-reduced-motion: reduce)');
 
 const saved = load();
 function load() {
-  try { return { runs: [], ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return { runs: [] }; }
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { /* start a new record */ }
+  if (!s || typeof s !== 'object' || Array.isArray(s)) s = {};
+  // Keep every run that can still be listed, even if something else in the save was damaged.
+  const runs = Array.isArray(s.runs) ? s.runs.filter(r => r && typeof r === 'object' && Array.isArray(r.grades) && r.grades.every(x => x && typeof x === 'object')) : [];
+  return { ...s, runs };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch { /* fine */ } }
 try { sound.on = JSON.parse(localStorage.getItem('engage.v1') || '{}')?.opts?.sound !== false; } catch { /* keep it on */ }

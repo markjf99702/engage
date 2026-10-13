@@ -41,7 +41,25 @@ function load() {
     const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
     if (saved && typeof saved === 'object') Object.assign(state, saved, { opts: { ...state.opts, ...saved.opts } });
   } catch { /* no storage: start fresh */ }
-  if (!(state.at >= 0 && state.at < cat.count)) Object.assign(state, defaults());
+  tidy();
+}
+
+// If a save has been damaged somehow, keep whatever in it is still good and start the rest afresh.
+function tidy() {
+  const d = defaults();
+  const num = x => typeof x === 'number' && Number.isFinite(x);
+  const star = i => Number.isInteger(i) && i >= 0 && i < cat.count;
+  if (!star(state.at)) Object.assign(state, { at: d.at, offset: d.offset, target: null });
+  if (!(Array.isArray(state.offset) && state.offset.length === 3 && state.offset.every(num))) {
+    const S = starPos(state.at), dist = Math.hypot(...S); // holding off the star, as if just in from Sol
+    state.offset = state.at === 0 ? d.offset : S.map(v => -v / dist * Math.min(holdAU(state.at) / AU_PER_PC, dist / 2));
+  }
+  for (const k of ['yaw', 'pitch', 'warp']) if (!num(state[k])) state[k] = d[k];
+  if (!(num(state.fov) && state.fov >= 2 * DEG && state.fov <= 100 * DEG)) state.fov = d.fov;
+  if (!star(state.target)) state.target = null;
+  state.log = Array.isArray(state.log) ? state.log.filter(e => e && star(e.star) && Array.isArray(e.sections) && e.sections.every(Array.isArray)) : [];
+  if (!(num(state.ly) && state.ly >= 0)) state.ly = state.log.reduce((sum, e) => sum + (num(e.ly) ? e.ly : 0), 0);
+  for (const k of Object.keys(d.opts)) if (typeof state.opts[k] !== 'boolean') state.opts[k] = d.opts[k];
 }
 
 function save() {

@@ -21,7 +21,12 @@ let lastText = 0;
 let next = null; // the selected ship's next milestone: { jd, text }
 
 function load() {
-  try { return { hails: {}, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return { hails: {} }; }
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { /* no hails yet */ }
+  if (!s || typeof s !== 'object' || Array.isArray(s)) s = {};
+  // Each hail is the moment it was sent; anything else in there is left out.
+  const hails = s.hails && typeof s.hails === 'object' ? Object.fromEntries(Object.entries(s.hails).filter(([, t]) => Number.isFinite(t))) : {};
+  return { ...s, hails };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch { /* fine */ } }
 

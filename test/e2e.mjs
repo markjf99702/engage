@@ -280,6 +280,35 @@ await Promise.all([page.waitForNavigation(), page.click('#ship-course')]);
 await bridgeReady();
 assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose the star Voyager 2 is bound for');
 
+// A damaged save keeps what's still good and starts the rest afresh, instead of stopping the page.
+{
+  const junk = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await junk.addInitScript(() => {
+    if (sessionStorage.getItem('damaged')) return;
+    sessionStorage.setItem('damaged', '1');
+    localStorage.setItem('engage.v1', JSON.stringify({ offset: null, fov: 0, log: [null, { star: 'Sirius' }], seenIntro: true }));
+    localStorage.setItem('engage.maru.v1', JSON.stringify({ runs: null }));
+    localStorage.setItem('engage.missions.v1', JSON.stringify({ hails: null }));
+    localStorage.setItem('engage.tonight.v1', JSON.stringify({ sky: 'bogus', place: { name: 'Nowhere' } }));
+  });
+  const p = await junk.newPage();
+  const broke = [];
+  p.on('pageerror', e => broke.push(e.message));
+  await p.goto(base);
+  await bridgeReady(p);
+  assert.equal(await p.locator('#where').innerText(), 'Earth orbit');
+  await p.click('#open-log');
+  assert.match(await p.locator('#stats').innerText(), /Nothing logged yet/);
+  for (const [file, hook] of [['maru.html', 'maru'], ['missions.html', 'missions'], ['tonight.html', 'tonight']]) {
+    await p.goto(base + file);
+    await p.waitForFunction(name => window[name], hook);
+  }
+  await p.click('#open-list');
+  assert.match(await p.locator('#list-note').innerText(), /from the suburbs/);
+  assert.deepEqual(broke, [], 'a damaged save stopped a page');
+  await junk.close();
+}
+
 // Tonight's sky: reached from the bridge, the stars tagged where they really are, a tap on Vulcan, and a course set.
 await page.goto(base);
 await bridgeReady();

@@ -48,7 +48,19 @@ let dirty = true, aimAnim = null, testNow = null;
 let placed = [];         // where things were drawn last frame, for taps: { x, y, r, hit }
 
 function load() {
-  try { return { sky: 'suburb', trim: 0, night: false, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { return { sky: 'suburb', trim: 0, night: false }; }
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { /* start afresh */ }
+  if (!s || typeof s !== 'object') s = {};
+  // Whatever doesn't make sense any more goes back to the start: the suburbs, and a place guessed again.
+  const p = s.place;
+  const placed = p && typeof p === 'object' && typeof p.name === 'string' && Number.isFinite(p.lat) && Number.isFinite(p.lon) && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180;
+  return {
+    ...s,
+    place: placed ? p : undefined,
+    sky: Object.keys(SKIES).includes(s.sky) ? s.sky : 'suburb',
+    trim: Number.isFinite(s.trim) ? s.trim : 0,
+    night: !!s.night,
+  };
 }
 function save() {
   const { place, sky: s, trim, night } = saved;
