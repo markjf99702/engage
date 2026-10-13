@@ -161,7 +161,7 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 
 .intro-card .primary { width: 100%; margin-top: 6px; }
 
 .loading { position: fixed; left: 0; right: 0; top: 45%; text-align: center; margin: 0; font: 500 14px/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-.noscript { padding: 24px; }
+.noscript { position: fixed; inset: 0; z-index: 30; margin: 0; padding: 24px; background: var(--bg); }
 .lost { position: fixed; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 15; width: min(340px, calc(100% - 32px)); padding: 20px; border-radius: 18px; text-align: center; background: var(--panel); border: 1px solid var(--line-strong); }
 .lost p { margin: 0 0 14px; color: #cdd5e3; }
 .lost .primary { width: 100%; }

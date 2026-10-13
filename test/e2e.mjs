@@ -78,6 +78,18 @@ await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
 await page.waitForTimeout(200);
 assert.equal(await text('#target-name'), 'Sirius', 'tapping a star did not choose it');
 
+// Without JavaScript, the page says what it needs it for, in front of everything else.
+{
+  const plain = await browser.newContext({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false });
+  const p = await plain.newPage();
+  for (const file of ['', 'tonight.html']) {
+    await p.goto(base + file);
+    const on = await p.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.className);
+    assert.equal(on, 'noscript', `the no-JavaScript note is hidden behind the page on ${file || 'the bridge'}`);
+  }
+  await plain.close();
+}
+
 // Picking from the list, and searching.
 await page.click('#choose');
 await page.fill('#search', 'proxima');
