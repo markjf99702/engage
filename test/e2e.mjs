@@ -178,6 +178,15 @@ await page.fill('#search', 'proxima');
 await page.locator('#list .row').first().click();
 assert.equal(await text('#target-name'), 'Proxima Centauri');
 assert.match(await text('#trip'), /4\.2\d ly away/);
+// Star names stay off the helm too: looking toward Proxima from Earth, Miaplacidus is at the helm's top edge.
+await page.waitForTimeout(1300);
+{
+  const helm = await page.locator('#console').boundingBox();
+  for (const l of await page.evaluate(() => engage.labels())) {
+    if (l.text === 'Proxima Centauri') continue; // the destination is always named
+    assert.ok(l.y + 4 < helm.y || l.x > helm.x + helm.width || l.x + l.w < helm.x, `${l.text} is under the helm`);
+  }
+}
 
 // Warp 9 to Proxima, flown fast, ends in a log entry.
 await page.evaluate(() => engage.speed(8));

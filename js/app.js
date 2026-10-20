@@ -178,8 +178,8 @@ function drawLabels(now) {
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, h);
   const cam = camAbs();
-  // Names stay off the header (where we are, and the buttons), and off each other.
-  const taken = [...document.querySelectorAll('.hud .where, .hud-buttons')].map(el => {
+  // Names stay off the header (where we are, and the buttons) and the helm, and off each other.
+  const taken = [...document.querySelectorAll('.hud .where, .hud-buttons, #console')].map(el => {
     const b = el.getBoundingClientRect();
     return [b.left - 4, b.top - 4, b.right + 4, b.bottom + 4];
   });
