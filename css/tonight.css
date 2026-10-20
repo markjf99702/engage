@@ -11,9 +11,11 @@
   backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .back:hover { border-color: var(--cyan); }
 .back svg { width: 20px; height: 20px; }
-.place { display: block; max-width: 100%; margin: 3px 0 0; padding: 0; border: 0; background: none; text-align: left; color: var(--text);
+/* The only way into "Where you are", so its tap area is 44 px tall; the negative margins keep the header where it was. */
+.place { display: block; max-width: 100%; margin: -9px 0 -12px; padding: 12px 0; border: 0; background: none; text-align: left; color: var(--text);
   font: 600 16px/1.25 var(--display); letter-spacing: 0.02em; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .place #clock { color: var(--muted); font-weight: 500; font-size: 13px; font-variant-numeric: tabular-nums; }
+.place #clock::before { content: '· '; }
 .place:hover #place-name { text-decoration: underline; text-underline-offset: 3px; }
 #night[aria-pressed="true"] { border-color: #ff6b5e; color: #ff6b5e; }
 
@@ -85,4 +87,7 @@ body.red::after { content: ''; position: fixed; inset: 0; z-index: 100; backgrou
 @media (max-width: 480px) {
   .back span { display: none; }
   .back { padding: 0 8px; }
+  /* The clock gets a line of its own, so a long place name and the time both fit. */
+  .place #clock { display: block; overflow: hidden; text-overflow: ellipsis; }
+  .place #clock::before { content: none; }
 }

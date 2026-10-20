@@ -500,6 +500,23 @@ await page.click('#go-dark');
 assert.ok(await page.evaluate(() => tonight.state.sunAlt) < -11, 'show tonight did not move to the dark');
 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'tonight’s sky scrolls sideways on a phone');
 
+// The place button, the only way into "Where you are", is a full-size tap target, and a guessed place and the time
+// both fit on a phone.
+{
+  const here = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, timezoneId: 'America/New_York' });
+  const p = await here.newPage();
+  p.on('pageerror', e => problems.push(e.message));
+  await p.clock.setFixedTime(new Date('2026-10-13T17:00:00Z'));
+  await p.goto(base + 'tonight.html');
+  await p.waitForFunction(() => window.tonight);
+  await p.evaluate(() => document.fonts.ready);
+  assert.equal(await p.locator('#place-name').innerText(), 'Near New York?');
+  assert.ok((await p.locator('#open-place').boundingBox()).height >= 44, 'the place button is too small to tap');
+  const cut = await p.evaluate(() => ['open-place', 'clock'].filter(id => { const el = document.getElementById(id); return el.scrollWidth > el.clientWidth; }));
+  assert.deepEqual(cut, [], `“${await p.locator('#open-place').innerText()}” is cut off`);
+  await here.close();
+}
+
 // Away from the listed cities, the place is guessed from the time zone's standard time, not summer time: in July,
 // Amsterdam's clocks are two hours ahead of UTC, but its zone is the one an hour ahead, 15° east.
 {

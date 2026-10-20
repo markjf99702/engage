@@ -219,7 +219,7 @@ function updateHud() {
 
 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
 const timeOf = d => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tzOf() }).toLowerCase().replace(' ', ' ');
-const clockText = (d, now) => `· ${now ? 'now, ' : ''}${d.toLocaleDateString('en-US', { weekday: 'short', timeZone: tzOf() })} ${timeOf(d)}`;
+const clockText = (d, now) => `${now ? 'now, ' : ''}${d.toLocaleDateString('en-US', { weekday: 'short', timeZone: tzOf() })} ${timeOf(d)}`; // the dot before it is in the CSS
 function tzOf() {
   const tz = saved.place?.tz;
   try { if (tz) { Intl.DateTimeFormat('en-US', { timeZone: tz }); return tz; } } catch { /* unknown zone */ }
