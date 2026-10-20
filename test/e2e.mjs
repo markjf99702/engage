@@ -392,6 +392,21 @@ await Promise.all([page.waitForNavigation(), page.click('#ship-course')]);
 await bridgeReady();
 assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose the star Voyager 2 is bound for');
 
+// On the near-Earth map, the Moon's name stays off Earth's: on 13 October 2026 the Moon is just past new, between Earth
+// and the Sun, where its name used to land on Earth's.
+{
+  const near = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const p = await near.newPage();
+  p.on('pageerror', e => problems.push(e.message));
+  await p.clock.setFixedTime(new Date('2026-10-13T19:00:00Z'));
+  await p.goto(base + 'missions.html#jwst');
+  await p.waitForFunction(() => window.missions?.view === 'earth' && missions.nearLabels.earth);
+  const { earth, moon } = await p.evaluate(() => missions.nearLabels);
+  assert.ok(moon, 'the Moon has no name');
+  assert.ok(moon.x1 <= earth.x0 || earth.x1 <= moon.x0 || moon.y1 <= earth.y0 || earth.y1 <= moon.y0, 'the Moon’s name is on top of Earth’s');
+  await near.close();
+}
+
 // A damaged save keeps what's still good and starts the rest afresh, instead of stopping the page.
 {
   const junk = await browser.newContext({ viewport: { width: 390, height: 844 } });

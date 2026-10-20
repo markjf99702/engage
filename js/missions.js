@@ -270,6 +270,13 @@ function label(text, x, y, color, align = 'left', size = 11) {
   ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(4, 6, 11, 0.85)'; ctx.strokeText(text, x, y);
   ctx.fillStyle = color; ctx.fillText(text, x, y);
 }
+// Where label() would put some text: { x0, x1, y0, y1 }.
+function labelBox(text, x, y, align, size) {
+  ctx.font = `600 ${size}px 'Chakra Petch', 'Arial Narrow', sans-serif`;
+  const w = ctx.measureText(text).width, x0 = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  return { x0, x1: x0 + w, y0: y - size / 2, y1: y + size / 2 };
+}
+const nearLabels = { earth: null, moon: null }; // the names on the near-Earth map, for the tests
 function ringLabel(text, r, color, a) {
   label(text, W / 2 + r * Math.cos(a), CY() + r * Math.sin(a), color, 'center', 10);
 }
@@ -347,10 +354,16 @@ function drawNear(jd, now, nowMs) {
   ctx.beginPath(); ctx.arc(cx, cy, 384400 * k, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(140, 180, 255, 0.18)'; ctx.stroke();
   const [mx, my] = nearXY(moonAt(jd), frame);
   ctx.fillStyle = '#c9d3e6'; ctx.beginPath(); ctx.arc(mx, my, 2.6, 0, Math.PI * 2); ctx.fill();
-  label('Moon', mx + 6, my - 8, 'rgba(201, 211, 230, 0.75)', 'left', 10);
   // Earth.
   ctx.fillStyle = '#7fb8ff'; ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2); ctx.fill();
   label('Earth', cx, cy + 16, '#9cc8ff', 'center', 11);
+  nearLabels.earth = labelBox('Earth', cx, cy + 16, 'center', 11);
+  // The Moon's name goes on the side away from Earth, so it never lands on Earth's.
+  const out = Math.atan2(my - cy, mx - cx), side = Math.cos(out) >= 0 ? 'left' : 'right';
+  const moonName = labelBox('Moon', mx + Math.cos(out) * 9, my + Math.sin(out) * 9, side, 10);
+  const clash = (a, b) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+  nearLabels.moon = clash(moonName, nearLabels.earth) ? null : moonName;
+  if (nearLabels.moon) label('Moon', mx + Math.cos(out) * 9, my + Math.sin(out) * 9, 'rgba(201, 211, 230, 0.75)', side, 10);
   // L2.
   const lx = cx + 1.5e6 * k;
   ctx.strokeStyle = 'rgba(255, 181, 74, 0.6)'; ctx.lineWidth = 1;
@@ -483,4 +496,4 @@ bind();
 choose(sel);
 requestAnimationFrame(frame);
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
-window.missions = { get sel() { return sel; }, get view() { return view; }, readings, choose };
+window.missions = { get sel() { return sel; }, get view() { return view; }, readings, choose, nearLabels };
