@@ -43,6 +43,7 @@ It’s a static site: plain HTML, CSS and JavaScript, with no build step.
 ```sh
 npx serve .                   # or any static file server, then open the printed address
 npm test                      # checks the numbers, the Kobayashi Maru's rules, the ships' positions and the sky overlay's astronomy, then flies it in Chromium through the real page (needs Playwright)
+npm install                   # once, for the screenshots: upng-js saves them with a 256-colour palette
 node tools/screenshots.mjs    # redraws docs/*.png, og.png, og-survey.png, og-maru.png, og-missions.png and og-tonight.png (add `survey`, `maru`, `missions` or `tonight` for only that one's)
 node tools/build-artifact.mjs # single-file copies for the Artifact viewer, in dist/
 node tools/make-icons.mjs     # redraws the PNG icons from icon.svg

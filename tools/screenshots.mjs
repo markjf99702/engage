@@ -1,16 +1,17 @@
 // Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png, og-tonight.png):  node tools/screenshots.mjs
 // Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, missions or tonight)
-// Math.random is seeded, so the warp streaks come out the same each time.
+// Math.random is seeded, so the warp streaks come out the same each time. Needs Playwright, and upng-js from `npm install`.
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 import { createServer } from 'node:http';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const require = createRequire(import.meta.url);
 let pw;
 try { pw = require('playwright'); } catch { pw = require(join(execSync('npm root -g').toString().trim(), 'playwright')); }
+const UPNG = require('upng-js');
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.woff2': 'font/woff2', '.webmanifest': 'application/manifest+json', '.json': 'application/json', '.bin': 'application/octet-stream' };
 const server = createServer(async (req, res) => {
@@ -26,6 +27,12 @@ const only = process.argv[2];
 // Headless Chromium draws WebGL in software.
 const browser = await pw.chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
 await mkdir(join(root, 'docs'), { recursive: true });
+
+// Saves a screenshot with a 256-colour palette, which keeps the pictures a fraction of the size.
+async function save(shot, path) {
+  const img = UPNG.decode(shot);
+  await writeFile(join(root, path), Buffer.from(UPNG.encode(UPNG.toRGBA8(img), img.width, img.height, 256)));
+}
 
 async function open(viewport, deviceScaleFactor) {
   const ctx = await browser.newContext({ viewport, deviceScaleFactor, hasTouch: true, serviceWorkers: 'block' });
@@ -46,11 +53,11 @@ if (!only) {
   const page = await open({ width: 390, height: 844 }, 2);
   await page.evaluate(() => engage.target('Proxima Centauri'));
   await page.waitForTimeout(1400);
-  await page.screenshot({ path: join(root, 'docs/phone-helm.png') });
+  await save(await page.screenshot(), 'docs/phone-helm.png');
 
   await page.evaluate(() => engage.freeze('Proxima Centauri', 0.42));
   await page.waitForTimeout(700);
-  await page.screenshot({ path: join(root, 'docs/phone-warp.png') });
+  await save(await page.screenshot(), 'docs/phone-warp.png');
 
   await page.reload();
   await page.waitForFunction(() => typeof window.engage?.jump === 'function'); // not just the Engage button, by its id
@@ -58,11 +65,11 @@ if (!only) {
   await page.click('#engage');
   await page.waitForFunction(() => !document.getElementById('arrival').hidden, null, { timeout: 20000 });
   await page.waitForTimeout(1600);
-  await page.screenshot({ path: join(root, 'docs/phone-log.png') });
+  await save(await page.screenshot(), 'docs/phone-log.png');
 
   await page.click('#arrival-home');
   await page.waitForTimeout(4200);
-  await page.screenshot({ path: join(root, 'docs/phone-home.png') });
+  await save(await page.screenshot(), 'docs/phone-home.png');
   await page.context().close();
 }
 
@@ -91,7 +98,7 @@ if (!only) {
   <div class="text"><div class="eyebrow">Warp 9 · real stars</div><h1>Engage</h1><p>Set course for a real star, pick a warp factor and go.</p><div class="meta">18,000 stars, each in its real place</div></div>
   <div class="view"></div>`);
   await card.waitForTimeout(300);
-  await card.screenshot({ path: join(root, 'og.png') });
+  await save(await card.screenshot(), 'og.png');
   await card.context().close();
 }
 
@@ -101,7 +108,7 @@ if (!only || only === 'survey') {
   await page.goto(base + 'survey.html#O');
   await page.waitForFunction(() => window.survey);
   await page.waitForTimeout(2500);
-  await page.screenshot({ path: join(root, 'docs/phone-survey.png') });
+  await save(await page.screenshot(), 'docs/phone-survey.png');
   const planets = await page.evaluate(async () => {
     const { paint, portrait } = await import('./js/planet-art.js');
     return [['earth', 3], ['jovian', 1], ['lava', 1], ['icegiant', 4], ['mars', 1]].map(([s, seed]) => portrait(paint(s, seed, 512), 520, 0.9).toDataURL());
@@ -128,7 +135,7 @@ if (!only || only === 'survey') {
   <img src="${planets[3]}" style="left:1050px; top:110px; width:200px">
   <img src="${planets[4]}" style="left:560px; top:120px; width:150px">`);
   await card.waitForTimeout(300);
-  await card.screenshot({ path: join(root, 'og-survey.png') });
+  await save(await card.screenshot(), 'og-survey.png');
   await card.context().close();
 }
 
@@ -140,17 +147,20 @@ if (!only || only === 'maru') {
       await page.waitForFunction(() => !maru.busy, null, { timeout: 20000 });
     }
   };
+  // Each run is seeded from the clock. This moment gives the README's picture: 150 aboard, the hull at 51%, five cruisers.
   const page = await open({ width: 390, height: 844 }, 2);
+  await page.clock.setFixedTime(new Date('2026-10-20T12:00:12Z'));
   await page.goto(base + 'maru.html');
   await page.waitForFunction(() => window.maru);
   await page.click('#start');
   await play(page, ['hail-maru', 'enter', 'beam', 'beam']);
   await page.click('.order[data-id="phasers"]');
   await page.waitForTimeout(450);
-  await page.screenshot({ path: join(root, 'docs/phone-maru.png') });
+  await save(await page.screenshot(), 'docs/phone-maru.png');
   await page.context().close();
 
   const wide = await open({ width: 700, height: 900 }, 1);
+  await wide.clock.setFixedTime(new Date('2026-10-20T12:00:12Z'));
   await wide.goto(base + 'maru.html');
   await wide.waitForFunction(() => window.maru);
   await wide.click('#start');
@@ -176,7 +186,7 @@ if (!only || only === 'maru') {
   <div class="view"></div>
   <div class="text"><div class="eyebrow">Starfleet Academy</div><h1>Kobayashi Maru</h1><p>The no-win test. You can’t save everyone, so you’re graded on how you lose.</p><div class="meta">One order a turn</div></div>`);
   await card.waitForTimeout(300);
-  await card.screenshot({ path: join(root, 'og-maru.png') });
+  await save(await card.screenshot(), 'og-maru.png');
   await card.context().close();
 }
 
@@ -187,7 +197,7 @@ if (!only || only === 'missions') {
   await page.waitForFunction(() => window.missions);
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(600);
-  await page.screenshot({ path: join(root, 'docs/phone-missions.png') });
+  await save(await page.screenshot(), 'docs/phone-missions.png');
   await page.context().close();
 
   const wide = await open({ width: 640, height: 700 }, 1);
@@ -214,7 +224,7 @@ if (!only || only === 'missions') {
   <div class="view"></div>
   <div class="text"><div class="eyebrow">Engage · Long-range sensors</div><h1>Long missions</h1><p>The Voyagers, New Horizons, Webb and the Pioneers, where they are right now.</p><div class="meta">From NASA’s own trajectories</div></div>`);
   await card.waitForTimeout(300);
-  await card.screenshot({ path: join(root, 'og-missions.png') });
+  await save(await card.screenshot(), 'og-missions.png');
   await card.context().close();
 }
 
@@ -227,7 +237,7 @@ if (!only || only === 'tonight') {
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(setUp);
   await page.waitForTimeout(400);
-  await page.screenshot({ path: join(root, 'docs/phone-tonight.png') });
+  await save(await page.screenshot(), 'docs/phone-tonight.png');
   await page.context().close();
 
   const wide = await open({ width: 700, height: 630 }, 1);
@@ -256,7 +266,7 @@ if (!only || only === 'tonight') {
   <div class="view"></div>
   <div class="text"><div class="eyebrow">Engage · Tonight’s sky</div><h1>Starfleet style</h1><p>Point your phone at the sky and see where Vulcan is tonight.</p><div class="meta">Every star tagged where it really is</div></div>`);
   await card.waitForTimeout(300);
-  await card.screenshot({ path: join(root, 'og-tonight.png') });
+  await save(await card.screenshot(), 'og-tonight.png');
   await card.context().close();
 }
 
