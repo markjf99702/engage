@@ -5,7 +5,7 @@ import { readFile, readdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { warpSpeed, apparentMag, formatDuration, formatLy, formatYear, tripYears, voyagerYears, physical, holdDistanceAU } from '../js/physics.js';
-import { describeKind, homeLines, composeEntry } from '../js/log.js';
+import { describeKind, homeLines, composeEntry, inTextFor, titleFor, tripLine } from '../js/log.js';
 import { DESTINATIONS } from '../js/destinations.js';
 import { CLASSES } from '../js/classes.js';
 
@@ -88,6 +88,16 @@ test('a log entry covers the star, home and the trip', () => {
   for (const l of ['The star', 'Planets', 'Looking home', 'The trip']) assert.ok(labels.includes(l), l);
   assert.match(e.intro, /Proxima b’s orbit/);
   assert.match(e.sections.find(s => s[0] === 'Looking home')[1], /Cassiopeia/);
+});
+
+test('the Pleiades are "The Pleiades" in a heading and "the Pleiades" in a sentence', () => {
+  const i = cat.byName.get('Alcyone');
+  const e = composeEntry(cat, i, { cam: at('Alcyone'), holdAU: 100, warp: 9, fromTitle: 'Sol', tripLy: 400, date: new Date('2026-10-08T00:00:00Z') });
+  assert.equal(e.title, 'The Pleiades');
+  assert.equal(titleFor(cat, i), 'The Pleiades');
+  assert.match(e.intro, /^We’ve dropped out of warp at the Pleiades, /);
+  assert.match(tripLine(400, 9, inTextFor(cat, i)), / from the Pleiades in /);
+  assert.equal(inTextFor(cat, cat.byName.get('Sirius')), 'Sirius');
 });
 
 test('the offline copy lists every script', async () => {

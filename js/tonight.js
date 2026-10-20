@@ -3,7 +3,7 @@
 // Tap a tag to read it, then set course for it on the bridge.
 import { loadCatalog } from './catalog.js';
 import { DESTINATIONS } from './destinations.js';
-import { describeKind, titleFor } from './log.js';
+import { describeKind, inTextFor, titleFor } from './log.js';
 import { CHARTS } from './charts.js';
 import { LY_PER_PC, apparentMag, formatLy, formatYear } from './physics.js';
 import {
@@ -601,7 +601,7 @@ function fillCard(s) {
     const left = new Date().getFullYear() - ly;
     facts = `${d?.kind || describeKind(cat.spect[s.i], cat.temp[s.i])}. The light reaching you tonight left it ${ly < 5000 ? `in ${formatYear(left)}` : `about ${formatLy(ly).replace(' ly', '')} years ago`}.`;
     course.href = `${BRIDGE}?course=${encodeURIComponent(cat.names[s.i])}`;
-    setText('card-course', `Set course for ${titleFor(cat, s.i)}`);
+    setText('card-course', `Set course for ${inTextFor(cat, s.i)}`);
     if (BRIDGE.startsWith('http')) { course.target = '_blank'; course.rel = 'noopener'; }
   } else if (s.kind === 'planet') {
     const p = sky.planets.find(x => x.name === s.name);

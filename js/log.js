@@ -10,6 +10,8 @@ const COLOUR = { O: 'Blue', B: 'Blue-white', A: 'White', F: 'Yellow-white', G: '
 
 export const notesFor = (cat, i) => NOTES.get(cat.names[i]) || null;
 export const titleFor = (cat, i) => notesFor(cat, i)?.title || cat.names[i];
+// The title in the middle of a sentence: "at the Pleiades", where a heading or a list says "The Pleiades".
+export const inTextFor = (cat, i) => notesFor(cat, i)?.inText || titleFor(cat, i);
 
 // "Orange giant, spectral type K2III", from the catalogue's spectral type, or from the colour if it has none.
 export function describeKind(spect, temp) {
@@ -84,7 +86,7 @@ export function composeEntry(cat, i, { cam, holdAU, warp, fromTitle, tripLy, dat
   const hold = notes?.hold?.label || `holding ${holdAU < 10 ? holdAU.toFixed(2) : Math.round(holdAU)} AU from the star`;
   const intro = i === 0
     ? `Back home, ${hold}.`
-    : `We’ve dropped out of warp at ${title}, ${formatLy(fromSol)} from Sol, and are ${hold}.`;
+    : `We’ve dropped out of warp at ${inTextFor(cat, i)}, ${formatLy(fromSol)} from Sol, and are ${hold}.`;
   const sections = [];
   const kind = notes?.kind || describeKind(cat.spect[i], cat.temp[i]);
   const approx = notes ? '' : 'about ';

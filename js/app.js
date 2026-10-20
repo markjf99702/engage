@@ -3,7 +3,7 @@ import { loadCatalog } from './catalog.js';
 import { Sky } from './sky.js';
 import { sound } from './audio.js';
 import { DESTINATIONS, GROUPS } from './destinations.js';
-import { composeEntry, describeKind, notesFor, titleFor } from './log.js';
+import { composeEntry, describeKind, inTextFor, notesFor, titleFor } from './log.js';
 import { filesForStar, label as classLabel } from './classes.js';
 import {
   AU_PER_PC, LY_PER_PC, apparentMag, formatDuration, formatLy, holdDistanceAU, stardate, tripYears, warpSpeed,
@@ -306,7 +306,7 @@ function updateHud() {
   const sd = `Stardate ${stardate()}`;
   if (trip) {
     $('status').textContent = trip.phase === 'drop' ? 'Dropping out of warp' : trip.phase === 'cruise' ? 'At warp' : 'Engaging';
-    $('where').textContent = `En route to ${titleFor(cat, trip.i)}`;
+    $('where').textContent = `En route to ${inTextFor(cat, trip.i)}`;
   } else {
     $('status').textContent = 'Holding';
     $('where').textContent = state.at === 0 ? 'Earth orbit' : titleFor(cat, state.at);
@@ -333,7 +333,7 @@ function engage() {
   turn = null;
   trip = {
     i, from, S, dir, hold, D, ly, a0, cam: from.slice(),
-    fromTitle: state.at === 0 ? 'Sol' : titleFor(cat, state.at),
+    fromTitle: state.at === 0 ? 'Sol' : inTextFor(cat, state.at),
     yaw0: state.yaw, pitch0: state.pitch, yaw1: nearestYaw(state.yaw, heading.yaw), pitch1: heading.pitch, fov0: state.fov,
     t0: performance.now(), align: 1.5 / speedUp, spool: 1.5 / speedUp, cruise, drop: 1.6 / speedUp,
     years: tripYears(ly, state.warp), warpFactor: state.warp, warp: 0, streak: 0, phase: 'align', rebased: false,
@@ -739,7 +739,7 @@ function hooks() {
       const i = cat.byName.get(name);
       const from = camAbs(), S = starPos(i);
       const to = S.map((v, k) => v - from[k]), d = Math.hypot(...to), dir = to.map(v => v / d);
-      trip = { i, S, dir, hold: Math.min(holdAU(i) / AU_PER_PC, d / 2), ly: d * LY_PER_PC, warpFactor: warp, fromTitle: state.at === 0 ? 'Sol' : titleFor(cat, state.at), cam: from };
+      trip = { i, S, dir, hold: Math.min(holdAU(i) / AU_PER_PC, d / 2), ly: d * LY_PER_PC, warpFactor: warp, fromTitle: state.at === 0 ? 'Sol' : inTextFor(cat, state.at), cam: from };
       arrive();
     },
     look(yawDeg, pitchDeg, fovDeg) { turn = null; state.yaw = yawDeg * DEG; state.pitch = pitchDeg * DEG; if (fovDeg) state.fov = fovDeg * DEG; dirty = true; },

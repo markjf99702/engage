@@ -1,5 +1,6 @@
 // The stars with notes in the captain's log. `star` is the name in data/stars.json; everything else is what the
 // log says on arrival. Temperatures in kelvin, brightness (all light, not just visible) and width against the Sun.
+// `inText` is the title as it reads in the middle of a sentence, where that differs ("at the Pleiades").
 // Any other star can be visited too: the log then works out what it can from the catalogue.
 
 export const HOME = 'Sol';
@@ -253,7 +254,7 @@ export const DESTINATIONS = [
     ],
   },
   {
-    star: 'Alcyone', title: 'The Pleiades', aka: 'Alcyone', group: 'giants',
+    star: 'Alcyone', title: 'The Pleiades', inText: 'the Pleiades', aka: 'Alcyone', group: 'giants',
     kind: 'Blue giant, spectral type B7, the brightest of the Seven Sisters', temp: 12750, lum: 2400, radius: 9.3,
     planets: 'None known.',
     notes: [
