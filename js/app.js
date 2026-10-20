@@ -103,7 +103,7 @@ async function start() {
   setTarget(state.target, false);
   courseFromLink();
   updateHud();
-  if (!state.seenIntro) $('intro').hidden = false;
+  if (!state.seenIntro) { $('intro').hidden = false; $('intro-go').focus(); }
   bind();
   requestAnimationFrame(frame);
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -477,15 +477,33 @@ function lookHome() {
 
 // ---------- Sheets ----------
 
-function openSheet(id) {
-  closeSheets();
+const SHEETS = ['picker', 'log', 'settings', 'arrival'];
+const touchy = matchMedia('(pointer: coarse)').matches;
+let opener = null; // the button that opened the sheet that's up, to hand focus back to when it closes
+
+// `from` is the button that opened it. Then the sheet takes focus, so a keyboard carries on inside it: the search
+// field in Set course, or else the close button. On a touchscreen the search field would bring the keyboard up over the list.
+function openSheet(id, from = null) {
+  for (const s of SHEETS) $(s).hidden = true;
   $(id).hidden = false;
   $('scrim').hidden = false;
+  opener = from;
+  if (from) (id === 'picker' && !touchy ? $('search') : $(id).querySelector('.close')).focus({ preventScroll: true });
 }
 
 function closeSheets() {
-  for (const id of ['picker', 'log', 'settings', 'arrival']) $(id).hidden = true;
+  const open = SHEETS.some(id => !$(id).hidden);
+  for (const id of SHEETS) $(id).hidden = true;
   $('scrim').hidden = true;
+  if (open && opener?.isConnected && !opener.disabled && opener.getClientRects().length) opener.focus({ preventScroll: true });
+  opener = null;
+}
+
+function dismissIntro() {
+  $('intro').hidden = true;
+  state.seenIntro = true;
+  save();
+  sound.blip(880);
 }
 
 function showArrival(entry) {
@@ -587,7 +605,7 @@ function renderList() {
 function bind() {
   $('warp').addEventListener('input', () => { updateWarp(); save(); });
   $('engage').addEventListener('click', engage);
-  $('choose').addEventListener('click', () => { $('search').value = ''; renderList(); openSheet('picker'); $('list').scrollTop = 0; });
+  $('choose').addEventListener('click', e => { $('search').value = ''; renderList(); openSheet('picker', e.currentTarget); $('list').scrollTop = 0; });
   $('search').addEventListener('input', renderList);
   $('list').addEventListener('click', e => {
     const b = e.target.closest('[data-star]');
@@ -596,19 +614,15 @@ function bind() {
     closeSheets();
     setTarget(Number(b.dataset.star));
   });
-  $('open-log').addEventListener('click', () => { renderLog(); openSheet('log'); });
-  $('open-settings').addEventListener('click', () => openSheet('settings'));
+  $('open-log').addEventListener('click', e => { renderLog(); openSheet('log', e.currentTarget); });
+  $('open-settings').addEventListener('click', e => openSheet('settings', e.currentTarget));
   $('look-home').addEventListener('click', lookHome);
   $('arrival-home').addEventListener('click', lookHome);
-  $('arrival-next').addEventListener('click', () => { $('search').value = ''; renderList(); openSheet('picker'); });
+  // The log entry goes away as Set course opens, so focus comes back to the destination button instead.
+  $('arrival-next').addEventListener('click', () => { $('search').value = ''; renderList(); openSheet('picker', $('choose')); });
   $('scrim').addEventListener('click', closeSheets);
   document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', closeSheets));
-  $('intro-go').addEventListener('click', () => {
-    $('intro').hidden = true;
-    state.seenIntro = true;
-    save();
-    sound.blip(880);
-  });
+  $('intro-go').addEventListener('click', dismissIntro);
   for (const [id, key] of [['opt-lines', 'lines'], ['opt-labels', 'labels'], ['opt-sound', 'sound']]) {
     $(id).addEventListener('change', e => {
       state.opts[key] = e.target.checked;
@@ -645,7 +659,7 @@ function bind() {
     save();
   });
   addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeSheets();
+    if (e.key === 'Escape') { if (!$('intro').hidden) dismissIntro(); closeSheets(); }
     if (e.target.closest('input, button') || trip) return;
     const step = state.fov * 0.08;
     const moves = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] };

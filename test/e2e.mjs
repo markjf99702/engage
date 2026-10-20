@@ -70,6 +70,49 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }
   await small.close();
 }
 
+// With a keyboard: the welcome card takes focus and Escape puts it away, Set course takes the search field, and a
+// sheet gives focus back to the button that opened it when it closes. Tonight's sheets do the same.
+{
+  const keys = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const p = await keys.newPage();
+  p.on('pageerror', e => problems.push(e.message));
+  const focused = () => p.evaluate(() => document.activeElement?.id || document.activeElement?.closest('.sheet')?.id + ' ' + document.activeElement?.className);
+  await p.goto(base);
+  await bridgeReady(p);
+  assert.equal(await focused(), 'intro-go', 'the welcome card did not take focus');
+  await p.keyboard.press('Escape');
+  assert.equal(await p.locator('#intro').evaluate(el => el.hidden), true, 'Escape did not put the welcome card away');
+  await p.focus('#choose');
+  await p.keyboard.press('Enter');
+  assert.equal(await focused(), 'search', 'Set course did not focus the search field');
+  await p.keyboard.type('vega');
+  assert.match(await p.locator('#list .row').first().innerText(), /^Vega/);
+  await p.keyboard.press('Escape');
+  assert.equal(await focused(), 'choose', 'closing Set course did not give focus back to the destination');
+  await p.focus('#open-settings');
+  await p.keyboard.press('Enter');
+  assert.equal(await focused(), 'settings close', 'Bridge settings did not take focus');
+  await p.keyboard.press('Escape');
+  assert.equal(await focused(), 'open-settings');
+  await p.goto(base + 'tonight.html');
+  await p.waitForFunction(() => window.tonight);
+  await p.focus('#open-list');
+  await p.keyboard.press('Enter');
+  assert.equal(await focused(), 'list close', 'tonight’s list did not take focus');
+  await p.keyboard.press('Escape');
+  assert.equal(await focused(), 'open-list');
+  await keys.close();
+  // On a touchscreen, Set course focuses its close button, so the phone's keyboard doesn't come up over the list.
+  const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const q = await phone.newPage();
+  await q.goto(base);
+  await bridgeReady(q);
+  await q.tap('#intro-go');
+  await q.tap('#choose');
+  assert.equal(await q.evaluate(() => document.activeElement?.closest('.sheet')?.id + ' ' + document.activeElement?.className), 'picker close', 'Set course did not focus its close button on a phone');
+  await phone.close();
+}
+
 // Tapping a star chooses it.
 await page.evaluate(() => engage.lookAtStar('Sirius'));
 await page.waitForTimeout(400);

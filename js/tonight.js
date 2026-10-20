@@ -719,18 +719,26 @@ function renderPlaces() {
 
 // ---------- Sheets ----------
 
-function openSheet(id) {
-  for (const s of ['card', 'list', 'places']) if (s !== id) $(s).hidden = true;
+const SHEETS = ['card', 'list', 'places'];
+let opener = null; // the button that opened the list or the places, to hand focus back to when the sheets close
+
+// `from` is the button that opened it. Then the sheet takes focus (its close button), so a keyboard carries on inside it.
+function openSheet(id, from = null) {
+  for (const s of SHEETS) if (s !== id) $(s).hidden = true;
   $(id).hidden = false;
   $('scrim').hidden = id === 'card'; // the card leaves the sky usable behind it
   document.body.classList.toggle('carded', id === 'card');
+  if (from) { opener = from; $(id).querySelector('.close').focus({ preventScroll: true }); }
 }
 function closeSheets() {
-  for (const s of ['card', 'list', 'places']) $(s).hidden = true;
+  const open = SHEETS.some(s => !$(s).hidden);
+  for (const s of SHEETS) $(s).hidden = true;
   $('scrim').hidden = true;
   document.body.classList.remove('carded');
   sel = null;
   dirty = true;
+  if (open && opener?.isConnected && opener.getClientRects().length) opener.focus({ preventScroll: true });
+  opener = null;
 }
 
 // ---------- Sensors ----------
@@ -815,8 +823,8 @@ function bind() {
     $('time').value = offsetMin;
     compute();
   });
-  $('open-place').addEventListener('click', () => openSheet('places'));
-  $('open-list').addEventListener('click', () => { renderList(); openSheet('list'); });
+  $('open-place').addEventListener('click', e => openSheet('places', e.currentTarget));
+  $('open-list').addEventListener('click', e => { renderList(); openSheet('list', e.currentTarget); });
   $('locate').addEventListener('click', locate);
   $('night').addEventListener('click', () => {
     saved.night = !saved.night; save();
