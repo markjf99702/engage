@@ -250,11 +250,10 @@ function answer(id) {
     else if (b.dataset.id === id) b.classList.add('wrong');
   });
   const picked = byId.get(id);
-  $('verdict-head').textContent = right ? 'Record filed. Nobody will look twice.' : `That file wouldn’t fool anyone. It’s ${label(c)}.`;
+  $('verdict-head').textContent = right ? 'Record filed. Nobody will look twice.' : `That file wouldn’t fool anyone. It’s ${c.inText || label(c)}.`;
   $('verdict-head').className = `verdict-head ${right ? 'ok' : 'bad'}`;
   $('verdict-text').textContent = right ? c.tell : `${c.tell} ${hint(picked)}.`;
   $('verdict-file').href = `#${c.id}`;
-  $('verdict-file').textContent = `Read the ${label(c)} file`;
   $('verdict').hidden = false;
   $('prompt').hidden = true;
   renderScore();
@@ -267,8 +266,12 @@ function hint(c) {
   const t = c.typical;
   const gas = GAS.has(c.art) && c.art !== 'venus';
   const k = x => Math.round(x).toLocaleString('en-US');
-  const air = t.air.charAt(0).toLowerCase() + t.air.slice(1);
-  return `The ${label(c)} file says ${c.short.toLowerCase()}: ${range(t.width, num)} × Earth’s width, ${k(t.temp[0])}–${k(t.temp[1])} K${gas ? ' at the cloud tops' : ''}, ${air}`;
+  const air = midSentence(t.air);
+  return `The ${label(c)} file says ${midSentence(c.short)}: ${range(t.width, num)} × Earth’s width, ${k(t.temp[0])}–${k(t.temp[1])} K${gas ? ' at the cloud tops' : ''}, ${air}`;
+}
+// Starts lower-case in the middle of a sentence, unless it starts with a name: "Earth-like", "Jupiter-like".
+function midSentence(s) {
+  return /^(Earth|Jupiter|Neptune)\b/.test(s) ? s : s.charAt(0).toLowerCase() + s.slice(1);
 }
 
 function renderScore() {

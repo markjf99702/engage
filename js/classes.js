@@ -1,5 +1,6 @@
 // The planetary survey files: Starfleet's planet classes, and the kinds of planet astronomers have actually found.
-// `letter` is the Starfleet class (null where Starfleet never named one). `art` picks how js/planet-art.js paints it.
+// `letter` is the Starfleet class (null where Starfleet never named one), and `inText` is how one of those unnamed kinds
+// reads in a sentence ("an ice giant"). `art` picks how js/planet-art.js paints it.
 // `typical` are the readings the survey shows, and the ranges the "cover your tracks" drill draws a world from:
 // width and mass against Earth, temperature at the surface (or the cloud tops) in kelvin, the year in Earth days.
 // `worlds` are real planets; `star` is the host's name in data/stars.json, so Engage can set course for it.
@@ -151,7 +152,7 @@ export const CLASSES = [
 
   // Found by astronomers, never named by Starfleet.
   {
-    id: 'super-earth', letter: null, name: 'Super-Earth', short: 'Bigger rocky planet', art: 'superearth',
+    id: 'super-earth', letter: null, name: 'Super-Earth', inText: 'a super-Earth', short: 'Bigger rocky planet', art: 'superearth',
     real: 'A rocky planet heavier than Earth',
     about: 'Rocky like Earth but up to about eight times heavier, with stronger gravity and probably thicker air. Among the most common planets around other stars, yet the Solar System has none. Starfleet would sort each one by its surface: many would be Class K or M.',
     typical: { width: [1.2, 1.6], mass: [2, 8], temp: [220, 450], year: [10, 120],
@@ -164,7 +165,7 @@ export const CLASSES = [
     ],
   },
   {
-    id: 'sub-neptune', letter: null, name: 'Sub-Neptune', short: 'Small and hazy', art: 'subneptune',
+    id: 'sub-neptune', letter: null, name: 'Sub-Neptune', inText: 'a sub-Neptune', short: 'Small and hazy', art: 'subneptune',
     real: 'A planet between Earth and Neptune in size, wrapped in thick gas',
     about: 'Two to three times Earth’s width, with a rocky or watery core buried under deep hydrogen and haze. It’s the most common kind of planet the Kepler telescope found, and there is nothing like it orbiting the Sun.',
     typical: { width: [2, 3.5], mass: [5, 15], temp: [300, 700], year: [3, 50],
@@ -176,7 +177,7 @@ export const CLASSES = [
     ],
   },
   {
-    id: 'lava-world', letter: null, name: 'Lava world', short: 'Molten surface', art: 'lava',
+    id: 'lava-world', letter: null, name: 'Lava world', inText: 'a lava world', short: 'Molten surface', art: 'lava',
     real: 'A rocky planet so close to its star its surface melts',
     about: 'Circling so close that a year lasts less than a day, the side facing the star is a sea of molten rock. The air, if any, is vaporised rock. The far side may be crusted over and dark.',
     typical: { width: [1.2, 2], mass: [3, 9], temp: [1500, 2700], year: [0.4, 1],
@@ -188,7 +189,7 @@ export const CLASSES = [
     ],
   },
   {
-    id: 'hot-jupiter', letter: null, name: 'Hot Jupiter', short: 'Giant, roasting', art: 'hotjupiter',
+    id: 'hot-jupiter', letter: null, name: 'Hot Jupiter', inText: 'a hot Jupiter', short: 'Giant, roasting', art: 'hotjupiter',
     real: 'A gas giant orbiting very close to its star',
     about: 'A gas giant circling closer to its star than Mercury does to the Sun, in days instead of years. The day side reaches over a thousand degrees and the giant puffs up. Nobody thought these could exist until the first was found.',
     typical: { width: [10, 20], mass: [100, 2000], temp: [1000, 2500], year: [1, 5],
@@ -201,7 +202,7 @@ export const CLASSES = [
     ],
   },
   {
-    id: 'ice-giant', letter: null, name: 'Ice giant', short: 'Neptune-like', art: 'icegiant',
+    id: 'ice-giant', letter: null, name: 'Ice giant', inText: 'an ice giant', short: 'Neptune-like', art: 'icegiant',
     real: 'An ice giant',
     about: 'Smaller than a gas giant, with a deep layer of water, ammonia and methane under its hydrogen. The methane gives it its blue. Starfleet lumps these in with Class J, but astronomers count them as their own kind.',
     typical: { width: [3.5, 4.5], mass: [12, 20], temp: [50, 80], year: [30000, 60000],
