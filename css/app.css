@@ -149,7 +149,9 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 
 
 .toggle { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--line); cursor: pointer; flex: none; }
 .toggle input { width: 20px; height: 20px; accent-color: var(--amber); margin: 0; }
-.about { overflow-y: auto; flex: 1 1 auto; min-height: 0; color: var(--muted); font-size: 14px; }
+/* The settings scroll as a whole, so on a short screen "What you're seeing" isn't squeezed into a sliver. */
+#settings { overflow-y: auto; overscroll-behavior: contain; }
+.about { flex: none; color: var(--muted); font-size: 14px; }
 .about h3 { margin: 18px 0 6px; font: 600 13px/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text); }
 .about p { margin: 0 0 10px; }
 .text-button { background: none; border: 0; padding: 8px 0; color: var(--amber); text-decoration: underline; text-underline-offset: 3px; }
@@ -174,6 +176,13 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 
   .hud-buttons { gap: 6px; flex-wrap: wrap; justify-content: flex-end; max-width: calc(4 * 38px + 3 * 6px); }
   .round { width: 38px; height: 38px; }
   .round svg { width: 18px; height: 18px; }
+}
+
+/* On the narrowest phones the warp slider gets a row of its own, with Engage under it. */
+@media (max-width: 360px) {
+  .helm { flex-wrap: wrap; }
+  .warp { flex-basis: 100%; }
+  .engage { flex: 1 1 100%; height: 50px; }
 }
 
 @media (min-width: 760px) {

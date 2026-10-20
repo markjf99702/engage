@@ -378,7 +378,6 @@ function fly(now) {
   const T = trip;
   const s = T.frozen ?? (now - T.t0) / 1000;
   const ease = x => x * x * (3 - 2 * x);
-  const narrow = innerWidth < 760;
   let dist = 0;
   if (s < T.align) {
     const k = ease(s / T.align);
@@ -414,7 +413,7 @@ function fly(now) {
     T.warp = Math.max(0, 1 - k * 2.2);
     T.streak = 46 * (1 - k);
     // Settle the view so the star sits above the log on a phone.
-    state.pitch = T.pitch1 - (narrow ? 0.34 * state.fov : 0) * ease(k);
+    state.pitch = T.pitch1 - lift() * ease(k);
     readout(1, dist);
   } else {
     arrive();
@@ -441,7 +440,7 @@ function arrive() {
   // Face the star, sitting above the log on a phone.
   const h = headingOf(T.dir);
   state.yaw = h.yaw;
-  state.pitch = clampPitch(h.pitch - (innerWidth < 760 ? 0.34 * state.fov : 0));
+  state.pitch = clampPitch(h.pitch - lift());
   sky.setOrigin(T.S);
   const entry = composeEntry(cat, T.i, { cam: camAbs(), holdAU: T.hold * AU_PER_PC, warp: T.warpFactor, fromTitle: T.fromTitle, tripLy: T.ly });
   state.log.unshift(entry);
@@ -453,6 +452,14 @@ function arrive() {
   updateHud();
   showArrival(entry);
   dirty = true;
+}
+
+// How far above the middle of the view a star you arrive at settles. On a phone the helm and the log cover the lower
+// part of the screen, so it sits a third of the view higher; on a short screen, like a phone on its side, that would
+// put it off the top, so it goes only as high as stays clear of the edge.
+function lift() {
+  if (innerWidth >= 760 && innerHeight >= 500) return 0;
+  return Math.min(0.34 * state.fov, Math.atan((innerHeight / 2 - 44) * sky.dpr / sky.focal(state.fov)));
 }
 
 function flash(strength) {
@@ -479,7 +486,16 @@ function lookAt(pos, duration = 1000) {
   const d = pos.map((v, k) => v - cam[k]);
   const l = Math.hypot(...d);
   const h = headingOf(d.map(v => v / l));
-  turn = { t0: performance.now(), dur: duration, yaw0: state.yaw, pitch0: state.pitch, yaw1: nearestYaw(state.yaw, h.yaw), pitch1: Math.max(-1.5, Math.min(1.5, h.pitch)) };
+  turn = { t0: performance.now(), dur: duration, yaw0: state.yaw, pitch0: state.pitch, yaw1: nearestYaw(state.yaw, h.yaw), pitch1: Math.max(-1.5, Math.min(1.5, h.pitch - aimLift())) };
+}
+
+// On a short screen (a phone on its side) or the narrowest phones, the helm reaches up to the middle of the view, so
+// a star you turn to goes halfway up the sky left between the header and the helm instead of behind it.
+function aimLift() {
+  const top = $('console').offsetTop; // where it sits, even while it's tucked away for a flight
+  if (top > innerHeight / 2 + 60) return 0;
+  const header = Math.max(...[...document.querySelectorAll('.hud .where, .hud-buttons')].map(el => el.getBoundingClientRect().bottom));
+  return Math.atan((innerHeight / 2 - (header + top) / 2) * sky.dpr / sky.focal(state.fov));
 }
 
 function steer(now) {
@@ -767,6 +783,8 @@ function hooks() {
     },
     look(yawDeg, pitchDeg, fovDeg) { turn = null; state.yaw = yawDeg * DEG; state.pitch = pitchDeg * DEG; if (fovDeg) state.fov = fovDeg * DEG; dirty = true; },
     lookAtStar(name) { const i = cat.byName.get(name); lookAt(starPos(i), 1); },
+    // Where a star is on the viewscreen, in CSS pixels, as last drawn.
+    project: name => sky.project(cat.byName.get(name)),
     lookHome,
     // Starts a trip and holds it at fraction t of the cruise, for pictures of the ship at warp.
     freeze(name, t) {

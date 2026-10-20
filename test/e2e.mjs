@@ -113,6 +113,32 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }
   await phone.close();
 }
 
+// On a phone on its side the chosen star sits above the helm, the star you arrive at clear of the log, and the settings
+// scroll as a whole; on the narrowest phones the warp slider gets a row of its own.
+for (const viewport of [{ width: 844, height: 390 }, { width: 320, height: 568 }]) {
+  const small = await browser.newContext({ viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const p = await small.newPage();
+  p.on('pageerror', e => problems.push(e.message));
+  const size = `${viewport.width}×${viewport.height}`;
+  await p.goto(base);
+  await bridgeReady(p);
+  await p.tap('#intro-go');
+  await p.evaluate(() => engage.target('Sirius'));
+  await p.waitForTimeout(1400);
+  const aimed = await p.evaluate(() => ({ star: engage.project('Sirius'), helm: document.getElementById('console').getBoundingClientRect().top }));
+  assert.ok(aimed.star.y + 10 < aimed.helm, `the chosen star is behind the helm on a ${size} screen`);
+  assert.ok(await p.locator('#warp').evaluate(el => el.getBoundingClientRect().width) > 150, `the warp slider is a stub on a ${size} screen`);
+  await p.evaluate(() => engage.jump('Sirius'));
+  await p.waitForTimeout(300);
+  const arrived = await p.evaluate(() => ({ star: engage.project('Sirius'), log: document.getElementById('arrival').getBoundingClientRect().toJSON() }));
+  const behind = arrived.star.x > arrived.log.left && arrived.star.x < arrived.log.right && arrived.star.y > arrived.log.top;
+  assert.ok(!behind && arrived.star.y > 10, `the star you arrive at is behind the log on a ${size} screen`);
+  await p.evaluate(() => engage.closeSheets());
+  await p.tap('#open-settings');
+  assert.ok(await p.locator('.about').evaluate(el => el.scrollHeight - el.clientHeight) <= 1, `“What you’re seeing” is squeezed into a scroll box on a ${size} screen`);
+  await small.close();
+}
+
 // Tapping a star chooses it.
 await page.evaluate(() => engage.lookAtStar('Sirius'));
 await page.waitForTimeout(400);
