@@ -10,7 +10,7 @@
   --line-strong: rgba(140, 180, 255, 0.32);
   --text: #e8edf6;
   --muted: #93a0b8;
-  --dim: #66728a;
+  --dim: #727f97; /* 4.6:1 on the panels, 5:1 on the page */
   --amber: #ffb54a;
   --amber-deep: #f08a24;
   --cyan: #86d8ff;
