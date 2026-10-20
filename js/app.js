@@ -103,7 +103,9 @@ async function start() {
   setTarget(state.target, false);
   courseFromLink();
   updateHud();
-  if (!state.seenIntro) { $('intro').hidden = false; $('intro-go').focus(); }
+  // Take the helm takes focus without being scrolled to: on a small phone, or one on its side, the card is taller than
+  // the screen, and it should open at the top.
+  if (!state.seenIntro) { $('intro').hidden = false; $('intro-go').focus({ preventScroll: true }); }
   bind();
   requestAnimationFrame(frame);
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});

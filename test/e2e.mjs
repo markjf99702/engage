@@ -50,13 +50,14 @@ assert.equal(await text('#where'), 'Earth orbit');
 assert.ok(await page.locator('#engage').isDisabled(), 'engage works with no destination');
 
 // On a small phone, or any phone turned on its side, the welcome card is taller than the screen, so it scrolls and
-// Take the helm can still be reached.
+// Take the helm can still be reached. It opens at the top all the same, though Take the helm has the focus.
 for (const viewport of [{ width: 320, height: 568 }, { width: 844, height: 390 }]) {
   const small = await browser.newContext({ viewport, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const p = await small.newPage();
   p.on('pageerror', e => problems.push(e.message));
   await p.goto(base);
   await bridgeReady(p);
+  assert.equal(await p.locator('#intro').evaluate(el => el.scrollTop), 0, `the welcome card opened scrolled down past its heading on a ${viewport.width}×${viewport.height} screen`);
   const touch = await small.newCDPSession(p);
   const x = viewport.width / 2, from = viewport.height - 40, to = 40;
   await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y: from }] });
