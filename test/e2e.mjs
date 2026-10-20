@@ -382,6 +382,20 @@ await page.evaluate(() => tonight.sense(270, 120, 0));
 const pointing = await page.evaluate(() => tonight.pointing());
 assert.ok(Math.abs(pointing.az - 90) < 1 && Math.abs(pointing.alt - 30) < 1, 'the sky does not follow the phone');
 await page.evaluate(() => tonight.unsense());
+// When the Moon, not the sky, hides a star, the card says so. Under a dark sky in New York late on 25 October 2026,
+// the Moon brings the limit down to 5.1, just past Tellar (61 Cygni, magnitude 5.2).
+await page.click('#open-place');
+await page.click('.sky-opt[data-id="dark"]');
+await page.locator('#places [data-close]').click();
+await page.evaluate(() => { tonight.place(40.71, -74.01, 'New York', 'America/New_York'); tonight.at('2026-10-26T02:00:00Z'); });
+await page.click('#open-list');
+assert.match(await text('#list-note'), /bright enough to see under a dark sky\.$/);
+await page.locator('.system', { hasText: 'Tellar' }).click();
+assert.match(await text('#card-look'), /up in the west\. The Moon is washing it out tonight\.$/, 'the card blamed the sky for the Moon');
+await page.locator('#card [data-close]').click();
+await page.click('#open-place');
+await page.click('.sky-opt[data-id="suburb"]');
+await page.locator('#places [data-close]').click();
 // In daylight it says so, and offers the evening.
 await page.evaluate(() => { tonight.place(40.71, -74.01, 'New York', 'America/New_York'); tonight.at('2026-10-10T17:00:00Z'); });
 assert.equal(await shown('#daylight'), true, 'no daylight notice at noon');

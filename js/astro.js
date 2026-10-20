@@ -99,10 +99,11 @@ export function whereToLook({ alt, az }) {
 }
 
 // How faint a star you can see: the darkness of the place, then however much the Sun and Moon wash out.
+// `inText` is how each reads in a sentence: "You can see it from the suburbs", "under a dark sky".
 export const SKIES = {
-  city: { label: 'City', mag: 3.5, note: 'Only the brightest stars through the glow' },
-  suburb: { label: 'Suburbs', mag: 4.6, note: 'The main patterns of the constellations' },
-  dark: { label: 'Dark sky', mag: 6.3, note: 'Everything the eye can see, Milky Way and all' },
+  city: { label: 'City', inText: 'from the city', mag: 3.5, note: 'Only the brightest stars through the glow' },
+  suburb: { label: 'Suburbs', inText: 'from the suburbs', mag: 4.6, note: 'The main patterns of the constellations' },
+  dark: { label: 'Dark sky', inText: 'under a dark sky', mag: 6.3, note: 'Everything the eye can see, Milky Way and all' },
 };
 
 export function limitingMag(sky, sunAlt, moonLit = 0, moonAlt = -90) {

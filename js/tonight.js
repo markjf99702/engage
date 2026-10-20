@@ -583,7 +583,7 @@ function fillCard(s) {
   const course = $('card-course');
   course.hidden = s.kind !== 'star';
   let kind, title, sub = '', line = '', facts = '', seeIt = '';
-  const skyName = SKIES[saved.sky].label.toLowerCase();
+  const skyIn = SKIES[saved.sky].inText;
   const night = sky.sunAlt > -12 ? ' once it’s dark' : '';
   if (s.kind === 'star') {
     const t = tags.find(x => x.i === s.i);
@@ -594,9 +594,10 @@ function fillCard(s) {
     title = t ? t.name : titleFor(cat, s.i);
     sub = [t?.chart && titleFor(cat, s.i) !== title ? titleFor(cat, s.i) : '', `${formatLy(ly)} away`].filter(Boolean).join(' · ');
     line = t?.chart?.line || d?.fiction || d?.notes?.[0] || '';
-    seeIt = m <= sky.nightLim
-      ? `You can see it from the ${skyName}${night}.`
-      : m < 6.5 ? `Too faint to pick out from the ${skyName}; it needs a dark sky.` : `Far too faint to see without a telescope (magnitude ${m.toFixed(1)}).`;
+    // When it would show in this sky with the Moon down, the Moon is what hides it, not the sky.
+    seeIt = m <= sky.nightLim ? `You can see it ${skyIn}${night}.`
+      : m <= limitingMag(saved.sky, -90) ? 'The Moon is washing it out tonight.'
+      : m < 6.5 ? `Too faint to pick out ${skyIn}; it needs a dark sky.` : `Far too faint to see without a telescope (magnitude ${m.toFixed(1)}).`;
     const left = new Date().getFullYear() - ly;
     facts = `${d?.kind || describeKind(cat.spect[s.i], cat.temp[s.i])}. The light reaching you tonight left it ${ly < 5000 ? `in ${formatYear(left)}` : `about ${formatLy(ly).replace(' ly', '')} years ago`}.`;
     course.href = `${BRIDGE}?course=${encodeURIComponent(cat.names[s.i])}`;
@@ -646,7 +647,7 @@ function renderList() {
     .sort((a, b) => a.state - b.state || (b.t.chart ? 1 : 0) - (a.t.chart ? 1 : 0) || b.t.alt - a.t.alt);
   const up = rows.filter(r => r.state === 0 && r.t.chart).length;
   const charted = tags.filter(t => t.chart).length;
-  $('list-note').textContent = `${up} of Starfleet’s ${charted} charted stars ${up === 1 ? 'is' : 'are'} up and bright enough to see from the ${SKIES[saved.sky].label.toLowerCase()}${sky.sunAlt > -12 ? ' once it’s dark' : ''}.`;
+  $('list-note').textContent = `${up} of Starfleet’s ${charted} charted stars ${up === 1 ? 'is' : 'are'} up and bright enough to see ${SKIES[saved.sky].inText}${sky.sunAlt > -12 ? ' once it’s dark' : ''}.`;
   const box = $('systems');
   box.replaceChildren(...rows.map(({ t, state }) => {
     const b = document.createElement('button');
