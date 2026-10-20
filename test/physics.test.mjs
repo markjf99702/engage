@@ -106,14 +106,15 @@ test('the offline copy lists every script', async () => {
   for (const f of await readdir(join(root, 'fonts'))) if (f.endsWith('.woff2')) assert.ok(sw.includes(`'fonts/${f}'`), f);
 });
 
-test('every survey world Engage can fly to is in the catalogue', () => {
+test('every survey world Engage can fly to is in the catalogue, as far away as the helm says', () => {
   for (const c of CLASSES) {
     for (const w of c.worlds) {
       if (!w.star) continue;
       const i = cat.byName.get(w.star);
       assert.ok(i !== undefined, `${w.name}: no star called ${w.star}`);
       const ly = Math.hypot(...at(w.star)) * 3.26156;
-      assert.ok(Math.abs(ly - w.ly) / w.ly < 0.1, `${w.name}: file says ${w.ly} ly, catalogue says ${ly.toFixed(1)}`);
+      const helm = ly >= 100 ? Math.round(ly) : Math.round(ly * 10) / 10;
+      assert.equal(w.ly, helm, `${w.name}: file says ${w.ly} ly, catalogue says ${ly.toFixed(2)}`);
     }
   }
 });

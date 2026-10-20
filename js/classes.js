@@ -3,7 +3,8 @@
 // reads in a sentence ("an ice giant"). `art` picks how js/planet-art.js paints it.
 // `typical` are the readings the survey shows, and the ranges the "cover your tracks" drill draws a world from:
 // width and mass against Earth, temperature at the surface (or the cloud tops) in kelvin, the year in Earth days.
-// `worlds` are real planets; `star` is the host's name in data/stars.json, so Engage can set course for it.
+// `worlds` are real planets; `star` is the host's name in data/stars.json, so Engage can set course for it, and then `ly`
+// is the catalogue's distance, as the helm gives it (test/physics.test.mjs checks they agree).
 
 export const CLASSES = [
   {
@@ -17,7 +18,7 @@ export const CLASSES = [
     worlds: [
       { name: 'Proxima b', star: 'Proxima Centauri', ly: 4.2, note: 'About Earth’s mass, in the zone where water could be liquid. Nobody yet knows whether it has air at all; its star’s flares may have stripped it.' },
       { name: 'Teegarden’s Star b', star: 'Teegarden\'s Star', ly: 12.5, note: 'One of the most Earth-like planets known by size and by the light it gets.' },
-      { name: 'TRAPPIST-1 e', star: 'TRAPPIST-1', ly: 40, note: 'A little smaller than Earth, in the middle of its star’s temperate zone. Webb is looking for an atmosphere.' },
+      { name: 'TRAPPIST-1 e', star: 'TRAPPIST-1', ly: 40.7, note: 'A little smaller than Earth, in the middle of its star’s temperate zone. Webb is looking for an atmosphere.' },
     ],
     candidate: true,
   },
@@ -98,7 +99,7 @@ export const CLASSES = [
     tell: 'Tiny, airless and covered in craters: a Class D planetoid.',
     home: 'Earth’s Moon, Ceres and hundreds of other moons and dwarf planets.',
     worlds: [
-      { name: 'TRAPPIST-1 b', star: 'TRAPPIST-1', ly: 40, note: 'Earth-sized, but Webb found it is bare rock with no thick atmosphere, about 230 °C on its day side.' },
+      { name: 'TRAPPIST-1 b', star: 'TRAPPIST-1', ly: 40.7, note: 'Earth-sized, but Webb found it is bare rock with no thick atmosphere, about 230 °C on its day side.' },
     ],
   },
   {
@@ -121,7 +122,7 @@ export const CLASSES = [
     home: 'Jupiter and Saturn.',
     worlds: [
       { name: 'Ægir', star: 'Ran', ly: 10.5, note: 'About Jupiter’s mass, circling Epsilon Eridani every seven years.' },
-      { name: 'Thestias', star: 'Pollux', ly: 34, note: 'About twice Jupiter’s mass, circling an orange giant star.' },
+      { name: 'Thestias', star: 'Pollux', ly: 33.8, note: 'About twice Jupiter’s mass, circling an orange giant star.' },
     ],
   },
   {
@@ -133,9 +134,9 @@ export const CLASSES = [
     tell: 'Jupiter-sized but thousands of times Earth’s mass: an ultragiant, Class T.',
     home: 'None. Jupiter is the heaviest planet in the Solar System.',
     worlds: [
-      { name: 'Epsilon Indi Ab', star: 'ε Indi', ly: 12, note: 'About six times Jupiter’s mass and only a few degrees above freezing. Webb photographed it directly in 2024.' },
-      { name: 'Beta Pictoris b', star: 'β Pictoris', ly: 63, note: 'About ten times Jupiter’s mass and still hot from forming, inside a huge disc of dust.' },
-      { name: 'HR 8799 b, c, d and e', star: 'HIP 114189', ly: 133, note: 'Four super-Jupiters, the first three photographed together in 2008: the first family of planets ever seen directly.' },
+      { name: 'Epsilon Indi Ab', star: 'ε Indi', ly: 11.8, note: 'About six times Jupiter’s mass and only a few degrees above freezing. Webb photographed it directly in 2024.' },
+      { name: 'Beta Pictoris b', star: 'β Pictoris', ly: 63.4, note: 'About ten times Jupiter’s mass and still hot from forming, inside a huge disc of dust.' },
+      { name: 'HR 8799 b, c, d and e', star: 'HIP 114189', ly: 129, note: 'Four super-Jupiters, the first three photographed together in 2008: the first family of planets ever seen directly.' },
     ],
   },
   {
@@ -160,8 +161,8 @@ export const CLASSES = [
     tell: 'Rocky but half again Earth’s width and several times its mass: a super-Earth.',
     home: 'None, which surprised astronomers.',
     worlds: [
-      { name: 'Luyten b', star: 'Luyten\'s Star', ly: 12.2, note: 'About three times Earth’s mass, in the zone where water could be liquid.' },
-      { name: 'Gliese 667 Cc', star: 'Gliese 667C', ly: 23.6, note: 'About four times Earth’s mass, circling the smallest star of a triple system in its temperate zone.' },
+      { name: 'Luyten b', star: 'Luyten\'s Star', ly: 12.4, note: 'About three times Earth’s mass, in the zone where water could be liquid.' },
+      { name: 'Gliese 667 Cc', star: 'Gliese 667C', ly: 22.7, note: 'About four times Earth’s mass, circling the smallest star of a triple system in its temperate zone.' },
     ],
   },
   {
@@ -185,7 +186,7 @@ export const CLASSES = [
     tell: 'A year shorter than a day and a day side of molten rock: a lava world.',
     home: 'None, though Jupiter’s moon Io is covered in volcanoes.',
     worlds: [
-      { name: '55 Cancri e', star: 'Copernicus', ly: 41, note: 'Twice Earth’s width, circling in 18 hours. Webb found signs of an atmosphere over its magma ocean in 2024.' },
+      { name: '55 Cancri e', star: 'Copernicus', ly: 40.3, note: 'Twice Earth’s width, circling in 18 hours. Webb found signs of an atmosphere over its magma ocean in 2024.' },
     ],
   },
   {
@@ -197,8 +198,8 @@ export const CLASSES = [
     tell: 'Jupiter-sized but with a year of only a few days, glowing hot: a hot Jupiter.',
     home: 'None.',
     worlds: [
-      { name: 'Dimidium', star: 'Helvetios', ly: 50, note: 'Half Jupiter’s mass, circling 51 Pegasi in four days. The first planet ever found around a Sun-like star, in 1995.' },
-      { name: 'Tau Boötis b', star: 'τ Boötis', ly: 51, note: 'Six times Jupiter’s mass with a year of three days.' },
+      { name: 'Dimidium', star: 'Helvetios', ly: 50.9, note: 'Half Jupiter’s mass, circling 51 Pegasi in four days. The first planet ever found around a Sun-like star, in 1995.' },
+      { name: 'Tau Boötis b', star: 'τ Boötis', ly: 50.9, note: 'Six times Jupiter’s mass with a year of three days.' },
     ],
   },
   {

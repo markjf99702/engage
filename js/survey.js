@@ -35,6 +35,8 @@ function num(x) {
   return x.toPrecision(1);
 }
 const range = ([a, b], f) => (a === b ? f(a) : `${f(a)}–${f(b)}`);
+// A planet's distance as its file gives it: to a tenth of a light year under 100, as the helm shows it.
+const lyText = ly => (ly >= 100 ? Math.round(ly).toLocaleString('en-US') : String(ly));
 function widthText(w) {
   if (Array.isArray(w)) return `${range(w, num)} × Earth`;
   const km = w * 2 * R_EARTH_KM;
@@ -120,7 +122,7 @@ function fileHtml(c) {
   ];
   const worlds = c.worlds.map(w => {
     const fly = w.star ? `<a class="fly" href="${BRIDGE}?course=${encodeURIComponent(w.star)}"${AWAY}>Set course <span aria-hidden="true">→</span></a>` : '';
-    return `<li><div class="w-head"><b>${esc(w.name)}</b><span class="ly">${esc(num(w.ly))} ly</span></div><p>${esc(w.note)}</p>${fly}</li>`;
+    return `<li><div class="w-head"><b>${esc(w.name)}</b><span class="ly">${esc(lyText(w.ly))} ly</span></div><p>${esc(w.note)}</p>${fly}</li>`;
   }).join('');
   return `
     <p class="eyebrow">${c.letter ? 'Starfleet survey file' : 'Found by astronomers'}</p>
