@@ -178,13 +178,21 @@ function drawLabels(now) {
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, w, h);
   const cam = camAbs();
-  const taken = [];
+  // Names stay off the header (where we are, and the buttons), and off each other.
+  const taken = [...document.querySelectorAll('.hud .where, .hud-buttons')].map(el => {
+    const b = el.getBoundingClientRect();
+    return [b.left - 4, b.top - 4, b.right + 4, b.bottom + 4];
+  });
+  const box = (x, y, tw) => [x - 2, y - 12, x + tw + 2, y + 4];
   const free = (x, y, tw) => {
-    const r = [x - 2, y - 12, x + tw + 2, y + 4];
+    const r = box(x, y, tw);
     if (taken.some(t => r[0] < t[2] && r[2] > t[0] && r[1] < t[3] && r[3] > t[1])) return false;
     taken.push(r);
     return true;
   };
+  // A name sits to the right of its star, or to the left where it would run off the screen.
+  const side = (x, gap, tw) => (x + gap + tw > w - 4 ? x - gap - tw : x + gap);
+  drawn = [];
   const onScreen = p => p && !p.behind && p.x > -20 && p.y > -20 && p.x < w + 20 && p.y < h + 20;
 
   // The target: brackets and its name.
@@ -202,8 +210,11 @@ function drawLabels(now) {
         g.lineTo(p.x + sx * (r - 6), p.y + sy * r);
       }
       g.stroke();
-      label(g, titleFor(cat, target), formatLy(cat.distanceFrom(target, cam) * LY_PER_PC), p.x + r + 6, p.y + 4, '#86d8ff');
-      free(p.x + r + 6, p.y + 4, 140);
+      const name = titleFor(cat, target), dist = formatLy(cat.distanceFrom(target, cam) * LY_PER_PC);
+      const lw = labelWidth(g, name, dist), x = side(p.x, r + 6, lw);
+      label(g, name, dist, x, p.y + 4, '#86d8ff');
+      taken.push(box(x, p.y + 4, lw));
+      drawn.push({ text: name, x, y: p.y + 4, w: lw });
     }
   }
 
@@ -220,8 +231,10 @@ function drawLabels(now) {
       g.stroke();
       g.setLineDash([]);
       const m = apparentMag(4.83, Math.hypot(...cam));
-      label(g, 'Sol', `mag ${m.toFixed(1)}`, p.x + 16, p.y + 4, '#ffd27a');
-      free(p.x + 16, p.y + 4, 90);
+      const lw = labelWidth(g, 'Sol', `mag ${m.toFixed(1)}`), x = side(p.x, 16, lw);
+      label(g, 'Sol', `mag ${m.toFixed(1)}`, x, p.y + 4, '#ffd27a');
+      taken.push(box(x, p.y + 4, lw));
+      drawn.push({ text: 'Sol', x, y: p.y + 4, w: lw });
     }
   }
 
@@ -242,10 +255,20 @@ function drawLabels(now) {
   for (const [, i, p] of shown.slice(0, 24)) {
     const text = titleFor(cat, i);
     const tw = g.measureText(text).width;
-    if (!free(p.x + 8, p.y + 4, tw)) continue;
+    const x = side(p.x, 8, tw);
+    if (x < 0 || x + tw > w || p.y < 8 || p.y > h - 8 || !free(x, p.y + 4, tw)) continue; // too near an edge to fit
     g.fillStyle = 'rgba(200, 212, 235, 0.62)';
-    g.fillText(text, p.x + 8, p.y + 4);
+    g.fillText(text, x, p.y + 4);
+    drawn.push({ text, x, y: p.y + 4, w: tw });
   }
+}
+let drawn = []; // the names on screen, for the tests: { text, x, y (the baseline), w }
+
+function labelWidth(g, text, sub) {
+  g.font = '600 13px "Chakra Petch", system-ui, sans-serif';
+  const tw = g.measureText(text).width;
+  g.font = '500 11px "Chakra Petch", system-ui, sans-serif';
+  return tw + 7 + g.measureText(sub).width;
 }
 
 function label(g, text, sub, x, y, color) {
@@ -754,6 +777,7 @@ function hooks() {
       state.yaw = trip.yaw1; state.pitch = trip.pitch1; state.fov = 60 * DEG;
     },
     redraw() { dirty = true; },
+    labels: () => drawn,
     // Draws now and returns the viewscreen as an image (the drawing buffer is cleared once it's on screen).
     snapshot() { sky.render(viewNow(0)); return $('sky').toDataURL('image/png'); },
     closeSheets,

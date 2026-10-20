@@ -278,9 +278,11 @@ function draw() {
   B = basis();
   S = Math.sqrt(W * H) / 2 / (2 * Math.tan(view.fov / 4));
   placed = [];
-  // Keep labels clear of the header and the controls.
+  // Keep labels clear of the header, the controls and the daylight notice when it's up.
   const hud = document.querySelector('.hud').getBoundingClientRect(), controls = document.querySelector('.controls .row').getBoundingClientRect();
   labelBoxes = [{ x: -100, y: -100, w: W + 200, h: hud.bottom - 10 + 100 }, { x: controls.left, y: controls.top - 34, w: controls.width, h: H }];
+  if (!$('daylight').hidden) { const b = $('daylight').getBoundingClientRect(); labelBoxes.push({ x: b.left, y: b.top, w: b.width, h: b.height }); }
+  reservedBoxes = labelBoxes.length;
   const zoom = Math.min(1.6, Math.max(0.8, Math.sqrt(80 * DEG / view.fov)));
 
   // The sky's colour from where the Sun is.
@@ -451,7 +453,7 @@ function drawMoon() {
 }
 
 const FONT = "'Chakra Petch', 'Avenir Next Condensed', 'Arial Narrow', sans-serif";
-let labelBoxes = [];
+let labelBoxes = [], reservedBoxes = 0; // the first few are the page's own: the header, the controls and the daylight notice
 function label(text, x, y, gap, style) {
   ctx.font = `${style === 'star' ? 500 : 600} ${style === 'star' ? 11 : 12}px ${FONT}`;
   const w = ctx.measureText(text).width;
@@ -495,7 +497,7 @@ function drawTag(t) {
   let x = p.x + R + 9, y = p.y - h / 2;
   if (x + w > W - 6 || overlaps({ x, y, w, h })) x = p.x - R - 9 - w;
   const box = { x, y, w, h };
-  const reserved = labelBoxes.slice(0, 2); // the header and the controls: never under those
+  const reserved = labelBoxes.slice(0, reservedBoxes); // never under the header, the controls or the daylight notice
   if (reserved.some(o => box.x < o.x + o.w && o.x < box.x + box.w && box.y < o.y + o.h && o.y < box.y + box.h) || (overlaps(box) && !trek)) { ctx.restore(); placed.push({ x: p.x, y: p.y, r: 20, hit: { kind: 'star', i: t.i }, rank: -20 }); return; }
   labelBoxes.push(box);
   ctx.fillStyle = `rgba(5, 9, 18, ${0.72 * a})`;
@@ -911,6 +913,8 @@ function hooks() {
     aimAt(name) { const t = tags.find(x => x.name === name || cat.names[x.i] === name); const s = { kind: 'star', i: t ? t.i : cat.byName.get(name) }; aim(s); aimAnim = null; const { alt, az } = altAz(selLocal(s)); view.az = az; view.alt = Math.min(Math.max(alt, -10), 80); dirty = true; },
     // Where a named star lands on screen, in CSS pixels.
     where(name) { const t = tags.find(x => x.name === name); const i = t ? t.i : cat.byName.get(name); B = basis(); return project(toLocal(sky.f, starDir(i))); },
+    // The tags drawn last frame, with their boxes on screen.
+    tags: () => placed.filter(q => q.box).map(q => ({ name: nameOf(q.hit), ...q.box })),
     tag(name) { const t = tags.find(x => x.name === name); return t && { alt: t.alt, seen: t.seen, mag: t.mag }; },
     // Pretend to be a phone held up: compass heading and tilt.
     sense(alpha, beta, gamma) { sensing = true; gotReading = true; pose = null; reading(alpha, { beta, gamma }); },

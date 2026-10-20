@@ -121,6 +121,19 @@ await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
 await page.waitForTimeout(200);
 assert.equal(await text('#target-name'), 'Sirius', 'tapping a star did not choose it');
 
+// Star names stay on the screen and off the header: around Sirius, seen from Earth on a phone, Alnilam and Rigel are at
+// the right edge and Alhena under the buttons.
+await page.waitForTimeout(200);
+{
+  const names = await page.evaluate(() => engage.labels());
+  assert.ok(names.some(l => l.text === 'Alnilam'), `Alnilam is not named: ${names.map(l => l.text)}`);
+  const hud = await page.evaluate(() => [...document.querySelectorAll('.hud .where, .hud-buttons')].map(el => el.getBoundingClientRect().toJSON()));
+  for (const l of names) {
+    assert.ok(l.x >= 0 && l.x + l.w <= 390 && l.y >= 12 && l.y <= 840, `${l.text} runs off the screen (${Math.round(l.x)} to ${Math.round(l.x + l.w)}, ${Math.round(l.y)} down)`);
+    for (const b of hud) assert.ok(l.x > b.right || l.x + l.w < b.left || l.y - 12 > b.bottom || l.y + 4 < b.top, `${l.text} is under the header`);
+  }
+}
+
 // Without JavaScript, the page says what it needs it for, in front of everything else.
 {
   const plain = await browser.newContext({ viewport: { width: 390, height: 844 }, javaScriptEnabled: false });
@@ -442,6 +455,21 @@ await page.locator('#places [data-close]').click();
 // In daylight it says so, and offers the evening.
 await page.evaluate(() => { tonight.place(40.71, -74.01, 'New York', 'America/New_York'); tonight.at('2026-10-10T17:00:00Z'); });
 assert.equal(await shown('#daylight'), true, 'no daylight notice at noon');
+// Tags stay out from under the notice: with the Vega colony's star right behind it, its tag isn't drawn there.
+{
+  await page.evaluate(() => tonight.aimAt('Vega colony'));
+  const notice = await page.locator('#daylight').boundingBox();
+  await page.evaluate(y => {
+    const { az } = tonight.state.view;
+    let { alt } = tonight.state.view;
+    for (let k = 0; k < 40; k++) { alt += (y - tonight.where('Vega colony').y) / 10; tonight.look(az, alt); }
+  }, notice.y + notice.height / 2);
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+  assert.ok(Math.abs((await page.evaluate(() => tonight.where('Vega colony'))).y - (notice.y + notice.height / 2)) < 8, 'Vega is not behind the notice');
+  for (const t of await page.evaluate(() => tonight.tags())) {
+    assert.ok(t.x > notice.x + notice.width || t.x + t.w < notice.x || t.y > notice.y + notice.height || t.y + t.h < notice.y, `${t.name}’s tag is under the daylight notice`);
+  }
+}
 await page.click('#go-dark');
 assert.ok(await page.evaluate(() => tonight.state.sunAlt) < -11, 'show tonight did not move to the dark');
 assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'tonight’s sky scrolls sideways on a phone');
