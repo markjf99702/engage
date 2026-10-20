@@ -136,6 +136,7 @@ input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 
 .past summary b { font: 600 17px/1.2 var(--display); }
 .past summary span { color: var(--muted); font-size: 13px; }
 .past summary .sd { font: 500 12px/1.2 var(--display); color: var(--dim); letter-spacing: 0.06em; text-align: right; }
+.past[open] summary span:last-child { display: none; } /* the entry opens with the same line */
 .past .entry { padding: 0 14px 12px; }
 
 .arrival { max-height: 62vh; max-height: 62dvh; }

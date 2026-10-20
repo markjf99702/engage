@@ -199,6 +199,12 @@ assert.ok(Math.abs(sun[1] - 60.8 * Math.PI / 180) < 0.1, 'the view did not turn 
 // The log keeps the trip, and so does a reload.
 await page.click('#open-log');
 assert.match(await text('#stats'), /1 star visited · 4\.2\d ly traveled/);
+// An entry opened from the log says its first line once, not in the heading and again underneath.
+await page.locator('.past summary').first().click();
+{
+  const intro = await page.locator('.past .intro-line').first().innerText();
+  assert.equal((await page.locator('.past').first().innerText()).split(intro).length - 1, 1, 'the open entry repeats its first line');
+}
 await page.reload();
 await bridgeReady();
 assert.equal(await text('#where'), 'Proxima Centauri', 'the ship forgot where it was');
