@@ -147,9 +147,10 @@ export function act(g, id) {
       say('Helm', g.aboard ? `Warp 8 out of the Neutral Zone with ${g.aboard} of the Maru’s people aboard.` : 'Warp 8 out of the Neutral Zone.');
       if (!g.maru.gone && g.maru.aboard) {
         g.maru.gone = true; g.maru.lostTurn = g.turn;
-        if (!g.rewritten) say('Communications', `The Maru is breaking up behind us, with ${g.maru.aboard} still aboard.`, 'bad');
+        say('Communications', g.rewritten
+          ? `We’re leaving the Maru adrift, with ${g.maru.aboard} still aboard.`
+          : `The Maru is breaking up behind us, with ${g.maru.aboard} still aboard.`, 'bad');
       }
-      if (g.rewritten && g.maru.aboard) g.maru.aboard = 0;
       return { events, lines };
     }
   } else if (id === 'surrender') {
@@ -273,16 +274,19 @@ export function evaluate(g) {
   const zoneTurns = g.zoneTurn;
   const afterMaru = g.maru.lostTurn && g.where === 'zone' ? g.turn - g.maru.lostTurn : 0;
 
-  if (g.rewritten) {
+  // The reprogrammed simulator only beats the test for the cadet who brings every one of the Maru's people over
+  // without firing a shot. Any other reprogrammed run is graded like a normal one, with the cheating on top.
+  const honesty = { name: 'Honesty', letter: 'F', why: 'You reprogrammed the simulator the night before.' };
+  if (g.rewritten && g.over === 'warp' && g.aboard === MARU && !f.playerFired) {
     return {
       title: 'Changed the rules', outcome: 'rewritten',
-      summary: `Everyone came home: all ${CREW} of your crew and ${maruSaved} from the Maru.`,
+      summary: `Everyone came home: all ${CREW} of your crew and all ${MARU} from the Maru.`,
       numbers: { crew, maruSaved, maruLost, prisoners },
       grades: [
         { name: 'Compassion', letter: 'A', why: 'Nobody was left behind.' },
         { name: 'Judgment', letter: 'A', why: 'A perfect result, for a simulation that allows none.' },
         { name: 'Restraint', letter: 'A', why: 'Not a shot fired.' },
-        { name: 'Honesty', letter: 'F', why: 'You reprogrammed the simulator the night before.' },
+        honesty,
       ],
       note: [
         'You are the only cadet to beat the Kobayashi Maru. You did it by changing the conditions of the test.',
@@ -294,7 +298,11 @@ export function evaluate(g) {
 
   let title, summary;
   if (g.over === 'stayed') { title = 'By the book'; summary = `You kept the treaty and your crew. The Maru’s ${MARU} died waiting.`; }
-  else if (g.over === 'warp' && g.aboard) { title = 'The lifeboat'; summary = `You brought ${people(g.aboard)} home from the Maru. ${maruLost} were lost${crew < CREW ? `, and ${CREW - crew} of your crew` : ''}.`; }
+  else if (g.over === 'warp' && g.aboard) {
+    title = 'The lifeboat';
+    // Only the reprogrammed simulator lets anyone bring all of them over.
+    summary = maruLost ? `You brought ${people(g.aboard)} home from the Maru. ${maruLost} were lost${crew < CREW ? `, and ${CREW - crew} of your crew` : ''}.` : `You brought all ${MARU} of the Maru’s people home.`;
+  }
   else if (g.over === 'warp') { title = 'Turned back'; summary = `You went in and came out with nobody. The Maru’s ${MARU} were lost${crew < CREW ? `, and ${CREW - crew} of your crew` : ''}.`; }
   else if (g.over === 'abandoned') { title = 'Last off the ship'; summary = `${crew} of your crew and ${maruSaved} from the Maru are alive, as prisoners of the Klingon Empire.`; }
   else if (f.firedFirst && !f.hailedKlingons) { title = 'The war you started'; summary = `Your ship and all ${CREW} aboard were lost${g.aboard ? `, with ${g.aboard} you’d saved from the Maru` : ''}. The Maru’s ${MARU} were lost.`; }
@@ -330,6 +338,7 @@ export function evaluate(g) {
     { name: 'Restraint', score: clamp(restraint), why: !went ? 'You never broke the treaty.' : f.firedFirst ? 'You fired the first shot.' : f.hailedKlingons ? 'You talked before you shot.' : f.playerFired ? 'You fired only after they did.' : 'You never fired a shot.' },
     { name: 'Nerve', score: clamp(nerve), why: !went ? 'You decided from a safe distance.' : g.over === 'warp' ? `You held for ${zoneTurns} ${zoneTurns === 1 ? 'turn' : 'turns'} under their guns, then ran.` : g.over === 'abandoned' ? 'You were the last off the ship.' : `You held your post for ${zoneTurns} ${zoneTurns === 1 ? 'turn' : 'turns'}, to the end.` },
   ].map(x => ({ ...x, letter: letter(x.score) }));
+  if (g.rewritten) grades.push(honesty);
 
   const note = [];
   note.push(f.hailedMaru ? 'You spoke to the Maru before you decided.' : went ? 'You never spoke to the Maru, so you never knew whether the call was a trap.' : 'You never even answered the Maru.');

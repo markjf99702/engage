@@ -113,9 +113,46 @@ test('the reprogrammed simulator lets everyone go home, and says so', () => {
   const g = play(['enter', 'beam', 'beam', 'beam', 'beam', 'beam', 'beam', 'warp'], { rewritten: true });
   assert.equal(g.over, 'warp');
   const e = evaluate(g);
+  assert.equal(e.title, 'Changed the rules');
   assert.equal(e.numbers.maruSaved, MARU);
   assert.equal(e.numbers.crew, CREW);
   assert.equal(e.grades.find(x => x.name === 'Honesty').letter, 'F');
+});
+
+test('a reprogrammed run that leaves anyone behind, or fires a shot, is graded like any other', () => {
+  const grade = (e, name) => e.grades.find(x => x.name === name);
+  // Staying out: the Maru's signal stops, and nobody comes home from her.
+  let e = evaluate(play(['leave'], { rewritten: true }));
+  assert.equal(e.title, 'By the book');
+  assert.equal(grade(e, 'Compassion').letter, 'F');
+  assert.equal(grade(e, 'Honesty').letter, 'F');
+  // Firing on cruisers that had promised not to fire.
+  e = evaluate(play(['enter', 'phasers', 'phasers', 'warp'], { rewritten: true }));
+  assert.equal(e.title, 'Turned back');
+  assert.equal(grade(e, 'Restraint').letter, 'F');
+  assert.equal(grade(e, 'Restraint').why, 'You fired the first shot.');
+  // Going straight back to warp is no act of compassion.
+  e = evaluate(play(['enter', 'warp'], { rewritten: true }));
+  assert.notEqual(grade(e, 'Compassion').letter, 'A');
+  // Leaving people aboard the Maru: they stay counted, and the log says how many.
+  const g = newGame({ seed: 7, rewritten: true });
+  const said = [];
+  for (const id of ['enter', 'beam', 'beam', 'warp']) said.push(...act(g, id).lines.map(l => l.text));
+  assert.equal(g.maru.aboard, MARU - 150, 'going to warp emptied the Maru');
+  assert.ok(said.some(t => t.includes(`${MARU - 150} still aboard`)), 'the log did not say who was left aboard');
+  e = evaluate(g);
+  assert.equal(e.title, 'The lifeboat');
+  assert.match(e.summary, new RegExp(`${MARU - 150} were lost`));
+  // Everyone aboard, but a shot fired on the way out.
+  e = evaluate(play(['enter', 'beam', 'beam', 'beam', 'beam', 'beam', 'beam', 'phasers', 'warp'], { rewritten: true }));
+  assert.equal(e.title, 'The lifeboat');
+  assert.equal(e.summary, `You brought all ${MARU} of the Maru’s people home.`);
+  assert.equal(grade(e, 'Restraint').letter, 'F');
+  for (const plan of [['leave'], ['enter', 'warp'], ['enter', 'beam', 'beam', 'warp']]) {
+    const x = evaluate(play(plan, { rewritten: true }));
+    assert.equal(x.grades.length, 5, `${plan}: four grades and honesty`);
+    assert.notEqual(x.title, 'Changed the rules');
+  }
 });
 
 test('every ending gets four grades and a note', () => {
