@@ -16,9 +16,10 @@ self.addEventListener('install', e => {
 });
 
 self.addEventListener('activate', e => {
-  // The other tools at junkdrawer.works/ share this address and keep their copies here too, so only clear out Engage's.
+  // The other tools at junkdrawer.works/ share this address and keep their copies here too, so only clear out Engage's,
+  // by their exact name: another tool's name could start with "engage-" as well.
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => k.startsWith('engage-') && k !== CACHE).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => k !== CACHE && /^engage-v[0-9]+$/.test(k)).map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 
