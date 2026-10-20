@@ -16,6 +16,7 @@
   font: 600 16px/1.25 var(--display); letter-spacing: 0.02em; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .place #clock { color: var(--muted); font-weight: 500; font-size: 13px; font-variant-numeric: tabular-nums; }
 .place #clock::before { content: '· '; }
+.place #clock:empty::before { content: none; } /* no time yet while the sky is being charted, so no dot either */
 .place:hover #place-name { text-decoration: underline; text-underline-offset: 3px; }
 #night[aria-pressed="true"] { border-color: #ff6b5e; color: #ff6b5e; }
 

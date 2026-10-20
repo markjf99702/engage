@@ -548,6 +548,24 @@ assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= i
   await here.close();
 }
 
+// On a wider screen the time follows the place after a dot. While the sky is still being charted there's no time yet,
+// and no dot hanging after "Finding you…" either.
+{
+  const wide = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const p = await wide.newPage();
+  p.on('pageerror', e => problems.push(e.message));
+  let release;
+  const held = new Promise(r => { release = r; });
+  await p.route('**/data/stars.bin', async route => { await held; await route.continue(); });
+  await p.goto(base + 'tonight.html');
+  const dot = () => p.evaluate(() => getComputedStyle(document.getElementById('clock'), '::before').content);
+  assert.equal(await dot(), 'none', 'a dot hangs after “Finding you…” before there’s a time');
+  release();
+  await p.waitForFunction(() => window.tonight);
+  assert.equal(await dot(), '"· "', 'no dot between the place and the time');
+  await wide.close();
+}
+
 // Away from the listed cities, the place is guessed from the time zone's standard time, not summer time: in July,
 // Amsterdam's clocks are two hours ahead of UTC, but its zone is the one an hour ahead, 15° east.
 {
