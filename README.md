@@ -15,6 +15,8 @@
   &nbsp;
   <img src="docs/phone-survey.png" alt="The planetary survey open at Class O, an ocean world covered in cloud, with thumbnails of the other classes below" width="250">
   &nbsp;
+  <img src="docs/phone-xeno.png" alt="The xenobiology lab grown for Class H: a tan, four-legged sail-backed dune grazer under a bright sun, next to a person for scale, with its field notes below" width="250">
+  &nbsp;
   <img src="docs/phone-maru.png" alt="The Kobayashi Maru on the tactical display: your ship fires phasers at one of five Klingon cruisers circling the disabled freighter, with 150 people rescued and the hull at 51%" width="250">
   &nbsp;
   <img src="docs/phone-missions.png" alt="Long missions: a map of the Solar System with the paths of Voyager 1 and 2, New Horizons and the two Pioneers curling out past the planets, Voyager 1 nearly at the one light-day ring" width="250">
@@ -31,6 +33,7 @@
 - **Look for the Sun.** The ☉ button turns the view toward home, marked even when it’s too faint to see.
 - **Drag to look around, pinch or scroll to zoom.** Arrow keys work too.
 - **The planetary survey** ([survey.html](https://junkdrawer.works/engage/survey.html), the ringed planet on the bridge) flips through Starfleet’s planet classes, from Class M to Demon class, next to the kinds astronomers have really found that Starfleet never named: super-Earths, sub-Neptunes, lava worlds, hot Jupiters and ice giants. Each file has typical readings, the Solar System’s examples, and real planets that fit, with **Set course** to fly there. The log links back to the files for the planets it mentions. **Cover your tracks** shows an unlogged world’s sensor readings and asks which file it would pass for.
+- **The xenobiology lab** ([xeno.html](https://junkdrawer.works/engage/xeno.html), the green flask on the bridge, or **Grow a creature** on any survey file) grows a creature for whichever planet class you pick, drawn in its home next to a person or a scale bar. The world decides the body: stronger gravity means more, thicker legs and a smaller animal; thick air and gentle gravity grow wings; a red dwarf’s dim light means huge eyes and near-black skin; no light means no eyes at all; heat grows a radiator sail, cold grows fur; above about 180 °C the lab gives up on water and guesses at a body of rock, like the Horta. Four field notes explain each choice, and a line says how seriously to take it. Gas giants grow drifting gas bags, ocean worlds grow swimmers, Class L grows plants (it has no animals), and every creature has a name and a link that brings it back. Star Trek species and real Earth life sit alongside as reference specimens, and **Keep in a jar** saves the ones you like.
 - **The Kobayashi Maru** ([maru.html](https://junkdrawer.works/engage/maru.html), the Starfleet delta on the bridge) is the Academy’s no-win test. The fuel carrier *Kobayashi Maru* is adrift inside the Klingon Neutral Zone with 381 aboard. Give one order a turn: hail, cross the line, beam survivors over (your shields drop while the transporter runs), fire, evade, go to warp, offer surrender or abandon ship. The simulation is rigged the way the Academy rigs it: the Maru is always lost and the cruisers keep coming. At the end the examiners grade how you lost on compassion, judgment, restraint and nerve, and your record stays on the briefing. After your first run you can reprogram the simulator, as one cadet did.
 - **Long missions** ([missions.html](https://junkdrawer.works/engage/missions.html), the dish on the bridge) tracks the real ships on the longest missions: Voyager 1 and 2, New Horizons, the James Webb Space Telescope, and the silent Pioneer 10 and 11. Their positions are worked out for this moment from NASA JPL Horizons trajectories, so the distances tick up as you watch. Each file has how far she is from the Sun and from Earth, her speed, how long a signal takes, the mission so far, what she’s doing now and where she’s bound, with **Set course** for the star she’ll pass. **Hail her** sends a message at the speed of light and shows when it arrives and when an answer could get back; it remembers the hail, so you can come back tomorrow to see it land. Webb gets a near-Earth view of her loop around L2.
 - **Tonight’s sky** ([tonight.html](https://junkdrawer.works/engage/tonight.html), the horizon on the bridge) shows the real sky from where you’re standing, with the stars Starfleet knows tagged on it: Vulcan at 40 Eridani, Farpoint at Deneb, Rigel VII, the Vega colony, Wolf 359 and more, plus every other star Engage has notes on. **Point your phone** and it follows your compass and tilt, so you can hold it up to the real sky; drag sideways if the compass is a little off. Without sensors, drag to look around. Tags say when a star is too faint for your sky (city, suburbs or dark) or below the horizon, and the Moon and naked-eye planets are drawn too. Tap a tag for the story, where to look and how old its light is, then **Set course** to fly there. The time slider runs to 12 hours ahead, and in daylight it offers the evening. It uses your location only if you share it, rounded to about 10 km and kept on your phone; otherwise it guesses from your time zone or you pick a city. Night vision turns everything red to keep your eyes dark-adapted.
@@ -42,9 +45,9 @@ It’s a static site: plain HTML, CSS and JavaScript, with no build step.
 
 ```sh
 npx serve .                   # or any static file server, then open the printed address
-npm test                      # checks the numbers, the Kobayashi Maru's rules, the ships' positions and the sky overlay's astronomy, then flies it in Chromium through the real page (needs Playwright)
+npm test                      # checks the numbers, the Kobayashi Maru's rules, the xenobiology lab's rules, the ships' positions and the sky overlay's astronomy, then flies it in Chromium through the real page (needs Playwright)
 npm install                   # once, for the screenshots: upng-js saves them with a 256-colour palette
-node tools/screenshots.mjs    # redraws docs/*.png, og.png, og-survey.png, og-maru.png, og-missions.png and og-tonight.png (add `survey`, `maru`, `missions` or `tonight` for only that one's)
+node tools/screenshots.mjs    # redraws docs/*.png, og.png, og-survey.png, og-maru.png, og-missions.png, og-tonight.png and og-xeno.png (add `survey`, `maru`, `missions`, `tonight` or `xeno` for only that one's)
 node tools/build-artifact.mjs # single-file copies for the Artifact viewer, in dist/
 node tools/make-icons.mjs     # redraws the PNG icons from icon.svg
 python3 tools/build-data.py HYG_CSV D3_CELESTIAL_DATA   # rebuilds data/ and img/milkyway.png (see the script)
@@ -63,6 +66,10 @@ To put it online with GitHub Pages: **Settings → Pages → Build and deploymen
 - `js/audio.js`: engine sounds, made with Web Audio.
 - `survey.html`, `css/survey.css`, `js/survey.js`: the planetary survey.
 - `js/classes.js`: the survey files: each class, its readings, and the real planets that fit it.
+- `xeno.html`, `css/xeno.css`, `js/xeno.js`: the xenobiology lab: the class strip, the tank, the field notes and the jars.
+- `js/xeno-gen.js`: the lab's rules: from a class and a seed, the conditions where the creature lives, its body and its field notes. Pure, checked by `test/xeno.test.mjs`.
+- `js/xeno-art.js`: draws each creature and its surroundings on a 2D canvas.
+- `js/species.js`: the reference specimens, from Star Trek and from Earth.
 - `maru.html`, `css/maru.css`, `js/maru.js`: the Kobayashi Maru: the tactical display, each turn played out, the evaluation and the record.
 - `js/maru-sim.js`: the Kobayashi Maru's rules and grading, with no page, so `test/maru.test.mjs` can check them.
 - `missions.html`, `css/missions.css`, `js/missions.js`: long missions: the map, the ship files and hailing.

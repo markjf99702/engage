@@ -1,0 +1,62 @@
+/* The xenobiology lab. Builds on css/app.css and the survey's header, strip and readings from css/survey.css. */
+
+.lab-intro { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+.xeno .strip-wrap { margin-top: 8px; }
+
+.lab { display: grid; gap: 14px; margin-top: 4px; }
+.tank { position: relative; aspect-ratio: 4 / 3; border-radius: 20px; overflow: hidden; border: 1px solid var(--line-strong); background: #02040a;
+  box-shadow: 0 0 0 4px rgba(134, 216, 255, 0.04), inset 0 0 40px rgba(0, 0, 0, 0.6); }
+.tank canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.tank::after { content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 30%); }
+.tank-tag { position: absolute; left: 0; top: 0; margin: 0; padding: 8px 12px; border-bottom-right-radius: 14px; background: rgba(5, 7, 13, 0.7);
+  font: 600 11px/1.2 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cyan); }
+.bench-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.bench-actions .secondary[aria-pressed="true"] { border-color: #6fe3a4; color: #6fe3a4; }
+
+.specimen { padding: 18px 18px 10px; border-radius: 20px; border: 1px solid var(--line); background: var(--panel); }
+.specimen h2 { margin: 4px 0 0; font: 600 26px/1.1 var(--display); letter-spacing: 0.02em; }
+.specimen .latin { margin: 2px 0 10px; color: var(--muted); font-style: italic; }
+.specimen .odds { margin: 0 0 6px; padding: 8px 10px; border-left: 3px solid var(--cyan); background: rgba(134, 216, 255, 0.06); color: #cdd5e3; font-size: 14px; border-radius: 0 10px 10px 0; }
+.specimen .odds b { color: var(--cyan); font-weight: 600; }
+.specimen .aside { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+.notes { list-style: none; margin: 10px 0 0; padding: 0; }
+.notes li { padding: 10px 0; border-top: 1px solid var(--line); }
+.notes h3 { margin: 0 0 3px; font: 600 11px/1.2 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); }
+.notes p { margin: 0; color: #cdd5e3; }
+.specimen .to-file { display: inline-block; margin: 6px 0 4px; font: 600 12px/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); text-decoration: none; padding: 6px 0; }
+.specimen .to-file:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+.section-head { margin: 28px 0 4px; font: 600 13px/1.2 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); }
+.refs-sub { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+.ref-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ref-list li { padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255, 255, 255, 0.02); }
+.ref-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.ref-head b { font: 600 16px/1.2 var(--display); letter-spacing: 0.02em; }
+.ref-kind { flex: none; font: 600 10px/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; padding: 4px 7px; border-radius: 999px; }
+.ref-kind.trek { color: var(--amber); border: 1px solid rgba(255, 181, 74, 0.4); }
+.ref-kind.earth { color: #6fe3a4; border: 1px solid rgba(111, 227, 164, 0.4); }
+.ref-home { margin: 2px 0 4px; font-size: 13px; color: var(--cyan); }
+.ref-list p { margin: 0; font-size: 14px; color: #cdd5e3; }
+.cabinet { margin-top: 12px; }
+.cabinet summary { cursor: pointer; padding: 10px 0; font: 600 13px/1.2 var(--display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.cabinet summary:hover { color: var(--text); }
+
+.jar-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.jar { position: relative; }
+.jar-open { width: 100%; display: grid; gap: 6px; padding: 6px 6px 10px; border-radius: 16px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.02); text-align: left; }
+.jar-open:hover { border-color: var(--line-strong); }
+.jar-open canvas { width: 100%; aspect-ratio: 4 / 3; border-radius: 11px; display: block; background: #02040a; }
+.jar-name { font: 600 13px/1.2 var(--display); letter-spacing: 0.02em; padding: 0 4px; }
+.jar-cls { font-size: 12px; color: var(--muted); padding: 0 4px; }
+.jar-drop { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line-strong); background: rgba(5, 7, 13, 0.75); display: grid; place-items: center; padding: 0; }
+.jar-drop svg { width: 14px; height: 14px; }
+
+.xeno .jd-foot { padding: 28px 0 calc(18px + var(--safe-b)); }
+
+@media (min-width: 760px) {
+  .lab { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .xeno .strip { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding: 4px 0 12px; }
+  .xeno .strip-group { writing-mode: vertical-rl; transform: rotate(180deg); flex-basis: auto; border-right: 1px solid var(--line); padding: 4px 2px; }
+  .refs .ref-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

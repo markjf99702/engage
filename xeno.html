@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Xenobiology lab · Engage</title>
+  <meta name="description" content="Pick a planet class and grow a creature that could live there, with notes on how its gravity, air, light and heat shaped it, next to Star Trek species and real Earth life.">
+  <meta property="og:title" content="Xenobiology lab">
+  <meta property="og:description" content="Pick a planet class and grow a creature that could live there.">
+  <meta property="og:image" content="https://junkdrawer.works/engage/og-xeno.png">
+  <meta property="og:url" content="https://junkdrawer.works/engage/xeno.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#05070d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preload" href="fonts/chakra-petch-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/survey.css">
+  <link rel="stylesheet" href="css/xeno.css">
+</head>
+<body class="survey xeno">
+  <noscript><p class="noscript">The xenobiology lab needs JavaScript to grow its creatures.</p></noscript>
+
+  <header class="top">
+    <a class="back" href="./" aria-label="Back to the bridge">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      <span>Bridge</span>
+    </a>
+    <div class="title">
+      <p class="eyebrow">Engage · Science station</p>
+      <h1>Xenobiology lab</h1>
+    </div>
+  </header>
+
+  <main>
+    <p class="lab-intro">Pick a kind of world and the lab grows something that could live there.</p>
+    <div class="strip-wrap">
+      <div class="strip" id="strip" role="group" aria-label="Planet class"></div>
+    </div>
+
+    <div class="lab">
+      <div class="bench">
+        <div class="tank">
+          <canvas id="tank" aria-hidden="true"></canvas>
+          <p class="tank-tag" id="tank-tag"></p>
+        </div>
+        <div class="bench-actions">
+          <button class="primary" id="again" type="button">Grow another</button>
+          <button class="secondary" id="keep" type="button">Keep in a jar</button>
+        </div>
+      </div>
+
+      <article class="specimen" id="specimen" aria-live="polite"></article>
+    </div>
+
+    <section class="refs" aria-labelledby="refs-head">
+      <h2 class="section-head" id="refs-head">Reference specimens</h2>
+      <p class="refs-sub" id="refs-sub"></p>
+      <ul class="ref-list" id="refs"></ul>
+      <details class="cabinet">
+        <summary>The whole cabinet</summary>
+        <ul class="ref-list" id="cabinet"></ul>
+      </details>
+    </section>
+
+    <section class="jars" id="jars-wrap" aria-labelledby="jars-head" hidden>
+      <h2 class="section-head" id="jars-head">Your jars</h2>
+      <ul class="jar-list" id="jars"></ul>
+    </section>
+  </main>
+
+  <footer class="jd-foot">
+    <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+    <span aria-hidden="true">·</span>
+    <a href="./">Engage</a>
+  </footer>
+
+  <script type="module" src="js/xeno.js"></script>
+</body>
+</html>

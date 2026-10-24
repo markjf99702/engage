@@ -56,6 +56,7 @@ a.round { color: var(--text); text-decoration: none; }
 #open-maru svg { stroke: #ff8f84; }
 #open-missions svg { stroke: var(--cyan); }
 #open-sky svg { stroke: var(--sun); }
+#open-xeno svg { stroke: #6fe3a4; }
 #look-home svg .ring { stroke: var(--sun); stroke-width: 1.2; stroke-dasharray: 2 3; }
 
 /* Warp readout */
