@@ -316,6 +316,7 @@ function updateWarp() {
   $('warp-out').textContent = w.toFixed(1).replace(/\.0$/, '');
   $('warp-speed').textContent = `${Math.round(warpSpeed(w)).toLocaleString('en-US')} × the speed of light`;
   $('warp').style.setProperty('--fill', `${(w - 1) / 8.9 * 100}%`);
+  $('open-scale').href = `warp.html?warp=${w}`;
   updateTrip();
 }
 

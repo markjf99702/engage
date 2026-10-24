@@ -79,11 +79,11 @@
       </button>
       <p class="trip" id="trip"></p>
       <div class="helm">
-        <label class="warp">
-          <span class="warp-label">Warp <output id="warp-out" for="warp">9</output></span>
+        <div class="warp">
+          <label class="warp-label" for="warp">Warp <output id="warp-out" for="warp">9</output></label>
           <input type="range" id="warp" min="1" max="9.9" step="0.1" value="9" aria-describedby="warp-speed">
-          <span class="warp-speed" id="warp-speed">1,516 × light</span>
-        </label>
+          <p class="warp-speed"><span id="warp-speed">1,516 × light</span> <a id="open-scale" href="warp.html" title="Warp scale: how far each warp factor gets you">Warp scale <span aria-hidden="true">›</span></a></p>
+        </div>
         <button class="engage" id="engage" type="button" disabled>Engage</button>
       </div>
     </section>
@@ -162,7 +162,7 @@
       <h2>Engage</h2>
       <p>You’re on the bridge, holding in Earth’s orbit. Choose a star, set your warp factor, and go.</p>
       <p>Every star out there is real and in its real place, so the sky changes the way it truly would as you travel. When you arrive, the log tells you what you’ve found.</p>
-      <p>The ringed planet at the top opens the planetary survey: Starfleet’s planet classes next to the real planets astronomers have found, and the flask beside it opens the xenobiology lab, which grows a creature for any of them. The Starfleet delta opens the Kobayashi Maru, the Academy’s no-win test, and the speech bubble opens first contact: an unknown ship hails you in a language made of stories, and you have to work out what they mean. The dish opens long-range sensors: where the Voyagers and other real ships are right now. The horizon opens tonight’s sky: hold your phone up and see which of the stars over your head Starfleet knows.</p>
+      <p>The ringed planet at the top opens the planetary survey: Starfleet’s planet classes next to the real planets astronomers have found, and the flask beside it opens the xenobiology lab, which grows a creature for any of them. The Starfleet delta opens the Kobayashi Maru, the Academy’s no-win test, and the speech bubble opens first contact: an unknown ship hails you in a language made of stories, and you have to work out what they mean. The dish opens long-range sensors: where the Voyagers and other real ships are right now. The horizon opens tonight’s sky: hold your phone up and see which of the stars over your head Starfleet knows. Under the warp slider, Warp scale races ships from Earth to the Moon, Vulcan, the galactic core and Andromeda, to show how far each warp factor really gets you.</p>
       <button class="primary" id="intro-go" type="button">Take the helm</button>
       <footer class="jd-foot">
         <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>

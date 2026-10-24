@@ -1,0 +1,86 @@
+/* The warp scale explorer. Builds on css/app.css and the survey's header from css/survey.css. */
+
+.lab-intro { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+
+.deck { display: grid; gap: 14px; margin-top: 12px; }
+.screen { position: relative; height: 440px; border-radius: 20px; overflow: hidden; border: 1px solid var(--line-strong); background: #02040a;
+  box-shadow: 0 0 0 4px rgba(134, 216, 255, 0.04), inset 0 0 40px rgba(0, 0, 0, 0.6); }
+.screen canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.race-note { margin: 10px 2px 0; min-height: 3em; color: #cdd5e3; font-size: 14px; }
+
+.race-actions { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; margin-top: 6px; }
+.race-actions .primary { min-width: 9.5em; }
+.custom { display: grid; grid-template-columns: auto 1fr; align-items: center; column-gap: 10px; min-width: 0; }
+.custom-label { font: 600 13px/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: #c9a2ff; white-space: nowrap; }
+.custom-label output { display: inline-block; min-width: 2.6em; font-variant-numeric: tabular-nums; }
+.custom-speed { grid-column: 1 / -1; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.custom input[type=range]::-webkit-slider-runnable-track { background: linear-gradient(90deg, #8a64d6, #c9a2ff var(--fill, 85%), rgba(255, 255, 255, 0.12) var(--fill, 85%)); }
+.custom input[type=range]::-moz-range-progress { background: #c9a2ff; }
+.custom input[type=range]::-webkit-slider-thumb { border-color: #c9a2ff; box-shadow: 0 0 12px rgba(201, 162, 255, 0.6); }
+.custom input[type=range]::-moz-range-thumb { border-color: #c9a2ff; }
+
+.place { padding: 18px 18px 10px; border-radius: 20px; border: 1px solid var(--line); background: var(--panel); }
+.place h2 { margin: 4px 0 2px; font: 600 26px/1.1 var(--display); letter-spacing: 0.02em; }
+.place .dist { margin: 0 0 4px; color: var(--cyan); font-size: 14px; }
+.place .about { margin: 12px 0 8px; color: #cdd5e3; }
+.place .trek { margin: 0 0 10px; padding: 8px 10px; border-left: 3px solid var(--amber); background: rgba(255, 181, 74, 0.06); color: #cdd5e3; font-size: 14px; border-radius: 0 10px 10px 0; }
+.place .trek b { margin-right: 4px; font: 600 11px/1 var(--display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); }
+.place .to-file { display: inline-block; margin: 8px 0 4px; font: 600 12px/1 var(--display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); text-decoration: none; padding: 6px 0; }
+.place .to-file:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Where the place sits on the ladder: how long its light takes, a light-second to a million years */
+.scale-bar { position: relative; height: 34px; margin: 10px 4px 4px; }
+.scale-bar::before { content: ''; position: absolute; left: 0; right: 0; top: 9px; height: 2px; border-radius: 1px; background: linear-gradient(90deg, rgba(134, 216, 255, 0.15), rgba(201, 162, 255, 0.35)); }
+.tick { position: absolute; top: 5px; width: 1px; height: 10px; background: rgba(140, 180, 255, 0.4); }
+.tick span { position: absolute; top: 14px; left: 0; transform: translateX(-50%); font: 500 10px/1 var(--display); letter-spacing: 0.04em; color: var(--dim); white-space: nowrap; }
+.tick:first-child span { transform: none; left: -2px; }
+.tick:last-child span { transform: translateX(-80%); }
+.mark { position: absolute; top: 3px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--c); box-shadow: 0 0 12px var(--c); border: 2px solid #02040a; }
+
+.times { width: 100%; border-collapse: collapse; margin: 6px 0 0; font-size: 14px; }
+.times caption { text-align: left; padding: 10px 0 6px; font: 600 11px/1.2 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); }
+.times th, .times td { padding: 7px 0; border-top: 1px solid var(--line); vertical-align: top; text-align: left; }
+.times th { font: 600 13px/1.4 var(--display); letter-spacing: 0.04em; white-space: nowrap; padding-right: 12px; width: 1%; }
+.times th i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; }
+.times td { color: #cdd5e3; font-variant-numeric: tabular-nums; }
+.times .arrive { display: block; color: var(--dim); font-size: 12px; }
+.times tr.there td { color: var(--text); }
+.times tr.there th::after { content: ' ✓'; color: #6fe3a4; }
+
+/* The ladder */
+.section-head { margin: 28px 0 4px; font: 600 13px/1.2 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--amber); }
+.ladder-sub { margin: 0 0 6px; color: var(--muted); font-size: 14px; }
+.rung { display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 4.6em); gap: 8px; align-items: center; width: 100%; padding: 9px 6px; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; }
+.rung:hover { background: rgba(255, 255, 255, 0.03); }
+.rung[aria-current="true"] { background: rgba(255, 181, 74, 0.08); box-shadow: inset 3px 0 0 var(--amber); }
+.rung-head { padding-top: 4px; padding-bottom: 4px; cursor: default; }
+.rung-head:hover { background: none; }
+.rung-head .t { font: 600 10px/1.2 var(--display); letter-spacing: 0.1em; text-transform: uppercase; }
+.rung-name { display: grid; min-width: 0; }
+.rung-name b { font: 600 15px/1.25 var(--display); letter-spacing: 0.02em; overflow-wrap: anywhere; }
+.rung-name span { font-size: 12px; color: var(--muted); }
+.rung.headline .rung-name b { color: var(--sun); }
+.rung .t { text-align: right; font: 500 13px/1.2 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.t.w9975 { color: var(--amber); }
+.t.w5 { color: var(--cyan); }
+.t.w1 { color: #f4f7ff; }
+.rung-group { margin: 18px 0 2px; font: 600 11px/1.2 var(--display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); }
+
+.how p { margin: 0 0 10px; color: #cdd5e3; font-size: 14px; max-width: 70ch; }
+.warp-page .jd-foot { padding: 28px 0 calc(18px + var(--safe-b)); }
+
+@media (max-width: 560px) {
+  .race-actions { grid-template-columns: 1fr; gap: 10px; }
+  .race-actions .primary { width: 100%; }
+}
+
+@media (max-width: 380px) {
+  .rung { grid-template-columns: minmax(0, 1fr) repeat(3, 4.1em); gap: 6px; }
+  .rung .t { font-size: 12px; }
+}
+
+@media (min-width: 760px) {
+  .deck { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .screen { height: 470px; }
+  .rung { grid-template-columns: minmax(0, 1fr) repeat(3, 7em); }
+}
