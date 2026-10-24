@@ -1,5 +1,5 @@
-// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png, og-tonight.png, og-xeno.png):  node tools/screenshots.mjs
-// Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, missions, tonight or xeno)
+// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png, og-tonight.png, og-xeno.png, og-contact.png):  node tools/screenshots.mjs
+// Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, missions, tonight, xeno or contact)
 // Math.random is seeded, so the warp streaks come out the same each time. Needs Playwright, and upng-js from `npm install`.
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
@@ -23,6 +23,7 @@ const server = createServer(async (req, res) => {
 }).listen(0);
 const base = `http://localhost:${server.address().port}/`;
 const SEED = 4;
+const CONTACT = 6; // the encounter in first contact's pictures
 const only = process.argv[2];
 // Headless Chromium draws WebGL in software.
 const browser = await pw.chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
@@ -310,6 +311,56 @@ if (!only || only === 'xeno') {
   <img src="${tanks[0]}" style="left:670px; top:320px; width:380px">`);
   await card.waitForTimeout(300);
   await save(await card.screenshot(), 'og-xeno.png');
+  await card.context().close();
+}
+
+// First contact: a phone screenshot partway in, with guesses in the notebook, and a link preview with the viewscreen.
+if (!only || only === 'contact') {
+  const settle = p => p.waitForFunction(() => !contact.busy, null, { timeout: 20000 });
+  const page = await open({ width: 390, height: 844 }, 2);
+  await page.emulateMedia({ reducedMotion: 'reduce' }); // every line at once, the captain standing still
+  await page.goto(base + 'contact.html');
+  await page.waitForFunction(() => window.contact);
+  await page.evaluate(seed => contact.start(seed), CONTACT);
+  await settle(page);
+  await page.evaluate(() => { contact.tag('meet', 'meet'); contact.pick('meet'); contact.send(); });
+  await settle(page);
+  await page.evaluate(() => { contact.tag('yes', 'yes'); contact.tag('see', 'see'); contact.pick('see'); });
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(500);
+  await save(await page.screenshot(), 'docs/phone-contact.png');
+  await page.context().close();
+
+  const wide = await open({ width: 760, height: 900 }, 2);
+  await wide.emulateMedia({ reducedMotion: 'reduce' });
+  await wide.goto(base + 'contact.html');
+  await wide.waitForFunction(() => window.contact);
+  await wide.evaluate(seed => contact.start(seed), CONTACT);
+  await settle(wide);
+  await wide.evaluate(() => { contact.pick('meet'); contact.send(); });
+  await settle(wide);
+  await wide.waitForTimeout(400);
+  const shot = await wide.evaluate(() => document.getElementById('screen').toDataURL());
+  await wide.context().close();
+
+  const font = async f => (await readFile(join(root, 'fonts', f))).toString('base64');
+  const card = await open({ width: 1200, height: 630 }, 1);
+  await card.setContent(`<!doctype html><style>
+    @font-face { font-family: C; font-weight: 600; src: url(data:font/woff2;base64,${await font('chakra-petch-600.woff2')}); }
+    @font-face { font-family: P; src: url(data:font/woff2;base64,${await font('ibm-plex-sans.woff2')}); }
+    body { margin: 0; width: 1200px; height: 630px; background: radial-gradient(ellipse at 20% 0%, #2a1a48, #05070d 65%); color: #e8edf6; overflow: hidden; position: relative; }
+    .text { position: absolute; left: 72px; top: 0; bottom: 0; width: 470px; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
+    .eyebrow { font: 600 22px C; letter-spacing: .18em; text-transform: uppercase; color: #c9a2ff; }
+    h1 { margin: 10px 0 18px; font: 600 80px/1 C; letter-spacing: .03em; }
+    p { margin: 0; font: 32px/1.3 P; color: #cdd5e3; }
+    .meta { margin-top: 30px; font: 600 22px C; letter-spacing: .08em; color: #ffb54a; }
+    .view { position: absolute; right: 0; top: 0; width: 700px; height: 630px; background: url(${shot}) 40% center / cover; }
+    .view::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #05070d 0%, rgba(5,7,13,0) 30%); }
+  </style>
+  <div class="view"></div>
+  <div class="text"><div class="eyebrow">Engage · Communications</div><h1>First contact</h1><p>They speak in stories. Work out what they mean, and answer in their words.</p><div class="meta">A new language every time</div></div>`);
+  await card.waitForTimeout(300);
+  await save(await card.screenshot(), 'og-contact.png');
   await card.context().close();
 }
 

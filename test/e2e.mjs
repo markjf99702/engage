@@ -428,6 +428,7 @@ assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose 
     localStorage.setItem('engage.missions.v1', JSON.stringify({ hails: null }));
     localStorage.setItem('engage.tonight.v1', JSON.stringify({ sky: 'bogus', place: { name: 'Nowhere' } }));
     localStorage.setItem('engage.xeno.v1', JSON.stringify({ jars: [null, { id: 'Z', seed: 1 }, 'x'] }));
+    localStorage.setItem('engage.contact.v1', JSON.stringify({ runs: [null, 3, { title: 7 }] }));
   });
   const p = await junk.newPage();
   const broke = [];
@@ -437,7 +438,7 @@ assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose 
   assert.equal(await p.locator('#where').innerText(), 'Earth orbit');
   await p.click('#open-log');
   assert.match(await p.locator('#stats').innerText(), /Nothing logged yet/);
-  for (const [file, hook] of [['maru.html', 'maru'], ['missions.html', 'missions'], ['xeno.html', 'xeno'], ['tonight.html', 'tonight']]) {
+  for (const [file, hook] of [['maru.html', 'maru'], ['missions.html', 'missions'], ['xeno.html', 'xeno'], ['contact.html', 'contact'], ['tonight.html', 'tonight']]) {
     await p.goto(base + file);
     await p.waitForFunction(name => window[name], hook);
   }
@@ -635,6 +636,52 @@ await page.waitForFunction(() => window.survey);
 await Promise.all([page.waitForNavigation(), page.locator('#file a', { hasText: 'Grow a creature' }).click()]);
 await page.waitForFunction(() => window.xeno?.current);
 assert.equal(await page.evaluate(() => xeno.current.classId), 'O');
+await page.goto(base);
+await bridgeReady();
+
+// First contact: reached from the bridge, phrases tapped from the notebook and guessed at, a misunderstanding, the
+// encounter carried through to the end, the debrief, and the record on the briefing.
+await Promise.all([page.waitForNavigation(), page.click('#open-contact')]);
+await page.waitForFunction(() => window.contact);
+await page.click('#start');
+const settled = () => page.waitForFunction(() => !contact.busy, null, { timeout: 20000 });
+await settled();
+assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'first contact scrolls sideways on a phone');
+assert.equal(await page.locator('#book li').count(), 2, 'the notebook does not hold their first two phrases');
+assert.ok(await page.locator('#send').isDisabled(), 'an empty reply can be sent');
+await page.locator('#book select').first().selectOption('meet');
+assert.match(await text('#comms'), /Hello, meeting\?/, 'the guess does not show on the channel');
+await page.locator('#book .ph-add').nth(1).click(); // "we" makes no sense as a reply to hello
+await page.click('#send');
+await settled();
+assert.equal(await page.locator('#patience i.gone').count(), 1, 'a misunderstanding cost no patience');
+assert.equal(await page.evaluate(() => contact.game.misses), 1);
+await page.locator('#book .ph-add').first().click();
+assert.equal(await page.locator('#reply li').count(), 1);
+await page.click('#send');
+await settled();
+assert.equal(await page.evaluate(() => contact.game.beat), 1, 'saying hello back did not move it on');
+const screenLit = await page.evaluate(() => {
+  const c = document.getElementById('screen'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  const seen = new Set(); for (let i = 0; i < d.length; i += 40) seen.add((d[i] >> 4) * 256 + (d[i + 1] >> 4) * 16 + (d[i + 2] >> 4));
+  return seen.size;
+});
+assert.ok(screenLit > 40, 'the viewscreen is not drawn');
+for (let n = 0; n < 20 && !(await page.evaluate(() => contact.game.over)); n++) {
+  await page.evaluate(() => { contact.pick(contact.hint()); contact.send(); });
+  await settled();
+}
+assert.equal(await page.evaluate(() => contact.game.over), 'contact');
+assert.equal(await text('#send'), 'READ THE DEBRIEF');
+await page.click('#send');
+assert.equal(await text('#eval-title'), 'First contact');
+assert.match(await text('#eval-score'), /^1\/1[0-9]/, 'the one right guess is not counted');
+assert.ok(await shown('#eval-story'), 'their new phrase is missing');
+await page.click('#again');
+assert.match(await text('#runs'), /1 of 1[0-9] phrases decoded/);
+await page.reload();
+await page.waitForFunction(() => window.contact);
+assert.equal(await page.locator('#runs li').count(), 1, 'the record was not kept');
 await page.goto(base);
 await bridgeReady();
 

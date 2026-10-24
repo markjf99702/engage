@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>First contact · Engage</title>
+  <meta name="description" content="An unknown ship hails you. The universal translator gives you their words but not their meaning: they speak in images from their own stories. Work out what each phrase means from when they say it, and answer in their language.">
+  <meta property="og:title" content="First contact">
+  <meta property="og:description" content="An unknown ship hails you in a language of stories. Work out what they mean, and answer them in it.">
+  <meta property="og:image" content="https://junkdrawer.works/engage/og-contact.png">
+  <meta property="og:url" content="https://junkdrawer.works/engage/contact.html">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#05070d">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="preload" href="fonts/chakra-petch-600.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/ibm-plex-sans.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/contact.css">
+</head>
+<body class="contact">
+  <noscript><p class="noscript">First contact needs JavaScript to run the encounter.</p></noscript>
+
+  <header class="top">
+    <a class="back" href="./" aria-label="Back to the bridge">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+      <span>Bridge</span>
+    </a>
+    <div class="title">
+      <p class="eyebrow">Engage · Communications</p>
+      <h1>First contact</h1>
+    </div>
+  </header>
+
+  <main>
+    <section id="brief" aria-label="Briefing">
+      <div class="card brief">
+        <p class="eyebrow">Incoming hail · Origin unknown</p>
+        <h2>A ship nobody has seen before</h2>
+        <p>A ship of no known design has dropped out of warp off your bow, and she’s hailing you.</p>
+        <p>The universal translator has their words. It can’t tell you what they mean. They speak in images from their own stories, names and places you’ve never heard of, the way the Tamarians did: “Darmok and Jalad at Tanagra.”</p>
+        <p>Listen for which phrases come back, and what they’re doing when they say them. Write your guesses in the notebook. Then answer them in their own words.</p>
+        <p class="how">Their patience runs out after five misunderstandings. Each encounter is a new language.</p>
+        <button class="primary" id="start" type="button">Answer the hail</button>
+      </div>
+      <div class="card record" id="record" hidden>
+        <p class="eyebrow">Your contacts</p>
+        <ol id="runs"></ol>
+      </div>
+    </section>
+
+    <section id="sim" hidden aria-label="Encounter">
+      <div class="screen-wrap">
+        <canvas id="screen" aria-label="Viewscreen"></canvas>
+        <p class="who-tag" id="who-tag">Unknown vessel</p>
+        <div class="patience" id="patience" aria-label="Their patience"></div>
+        <div class="subtitle" id="subtitle" aria-hidden="true"></div>
+      </div>
+
+      <div class="side">
+        <div class="reply card-ish">
+          <div class="reply-head">
+            <p class="eyebrow">Your reply</p>
+            <button class="text-button" id="clear" type="button" hidden>Clear</button>
+          </div>
+          <ol class="reply-list" id="reply"></ol>
+          <p class="reply-empty" id="reply-empty">Tap phrases in the notebook to answer in their words, up to three.</p>
+          <button class="primary" id="send" type="button" disabled>Send</button>
+          <div class="acts">
+            <button class="secondary" id="listen" type="button">Listen again</button>
+            <button class="secondary" id="standard" type="button">Speak Standard</button>
+            <button class="secondary" id="shields" type="button">Raise shields</button>
+            <button class="secondary danger" id="leave" type="button">Break off</button>
+          </div>
+        </div>
+
+        <section class="book card-ish" aria-labelledby="book-head">
+          <div class="reply-head">
+            <h2 class="eyebrow" id="book-head">Notebook</h2>
+            <span class="book-n" id="book-n"></span>
+          </div>
+          <ul class="book-list" id="book"></ul>
+        </section>
+      </div>
+
+      <div class="comms" id="comms" role="log" aria-live="polite" aria-label="Channel"></div>
+    </section>
+
+    <section id="eval" hidden aria-label="Debrief">
+      <div class="card evaluation">
+        <p class="eyebrow">Communications · Debrief</p>
+        <h2 id="eval-title"></h2>
+        <p class="summary" id="eval-summary"></p>
+        <p class="story" id="eval-story" hidden></p>
+        <div class="score" id="eval-score"></div>
+        <h3>Their words</h3>
+        <ul class="dict" id="dict"></ul>
+        <details class="transcript">
+          <summary>The conversation, translated</summary>
+          <ol id="transcript"></ol>
+        </details>
+        <div class="eval-actions">
+          <a class="secondary" id="to-bridge" href="./">Back to the bridge</a>
+          <button class="primary" id="again" type="button">Answer another hail</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="jd-foot">
+    <a href="https://junkdrawer.works/">Part of junkdrawer.works</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://junkdrawer.works/privacy.html">Privacy</a>
+    <span aria-hidden="true">·</span>
+    <a href="./">Engage</a>
+  </footer>
+
+  <script type="module" src="js/contact.js"></script>
+</body>
+</html>
