@@ -1,5 +1,5 @@
 // Bundles the whole app into one HTML file for the Artifact viewer:  node tools/build-artifact.mjs
-// Writes dist/engage.html, dist/survey.html, dist/maru.html, dist/missions.html, dist/tonight.html, dist/xeno.html and dist/contact.html: styles, fonts, scripts, star data and the Milky Way all inline, with no document wrapper
+// Writes dist/engage.html, dist/survey.html, dist/maru.html, dist/missions.html, dist/tonight.html, dist/xeno.html, dist/contact.html and dist/warp.html: styles, fonts, scripts, star data and the Milky Way all inline, with no document wrapper
 // (the viewer adds its own). The site itself still runs from the repo as-is; this is only for the playable copy.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
@@ -38,7 +38,8 @@ const js = await bundle(ORDER, async (name, src) => {
   if (name !== 'app') return src;
   return src
     .replace("img.src = 'img/milkyway.png';", `img.src = 'data:image/png;base64,${await b64('img/milkyway.png')}';`)
-    .replace("const SURVEY = 'survey.html';", `const SURVEY = '${LIVE}survey.html';`);
+    .replace("const SURVEY = 'survey.html';", `const SURVEY = '${LIVE}survey.html';`)
+    .replace("$('open-scale').href = `warp.html", "$('open-scale').href = `" + LIVE + 'warp.html');
 });
 const data = {
   'data/stars.bin': await b64('data/stars.bin'),
@@ -63,7 +64,8 @@ const body = pageBody(html).replaceAll('href="survey.html"', `href="${LIVE}surve
   .replaceAll('href="missions.html"', `href="${LIVE}missions.html" target="_blank" rel="noopener"`)
   .replaceAll('href="tonight.html"', `href="${LIVE}tonight.html" target="_blank" rel="noopener"`)
   .replaceAll('href="xeno.html"', `href="${LIVE}xeno.html" target="_blank" rel="noopener"`)
-  .replaceAll('href="contact.html"', `href="${LIVE}contact.html" target="_blank" rel="noopener"`);
+  .replaceAll('href="contact.html"', `href="${LIVE}contact.html" target="_blank" rel="noopener"`)
+  .replaceAll('href="warp.html"', `href="${LIVE}warp.html" target="_blank" rel="noopener"`);
 const out = `${title}
 <meta name="theme-color" content="#05070d">
 <style>
@@ -205,3 +207,24 @@ ${contactJs}
 `;
 await writeFile(join(root, 'dist/contact.html'), contactOut);
 console.log(`dist/contact.html: ${(contactOut.length / 1024).toFixed(0)} KB`);
+
+// The warp scale, as its own single file. Links back to the bridge go to the live site.
+const warpHtml = await read('warp.html');
+const warpJs = await bundle(['physics', 'ephemeris', 'warp-scale', 'warp'], (name, src) =>
+  src.replace("const BRIDGE = './';", `const BRIDGE = '${LIVE}';`));
+const warpOut = `<title>Warp scale</title>
+<meta name="theme-color" content="#05070d">
+<style>
+${css}
+${await read('css/survey.css')}
+${await read('css/warp.css')}
+</style>
+${pageBody(warpHtml).replaceAll('href="./"', `href="${LIVE}" target="_blank" rel="noopener"`)}
+<script type="module">
+const __m = {};
+document.body.classList.add('survey', 'warp-page');
+${warpJs}
+</script>
+`;
+await writeFile(join(root, 'dist/warp.html'), warpOut);
+console.log(`dist/warp.html: ${(warpOut.length / 1024).toFixed(0)} KB`);

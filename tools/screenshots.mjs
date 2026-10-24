@@ -1,5 +1,5 @@
-// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png, og-tonight.png, og-xeno.png, og-contact.png):  node tools/screenshots.mjs
-// Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, missions, tonight, xeno or contact)
+// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png, og-tonight.png, og-xeno.png, og-contact.png, og-warp.png):  node tools/screenshots.mjs
+// Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, missions, tonight, xeno, contact or warp)
 // Math.random is seeded, so the warp streaks come out the same each time. Needs Playwright, and upng-js from `npm install`.
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
@@ -361,6 +361,46 @@ if (!only || only === 'contact') {
   <div class="text"><div class="eyebrow">Engage · Communications</div><h1>First contact</h1><p>They speak in stories. Work out what they mean, and answer in their words.</p><div class="meta">A new language every time</div></div>`);
   await card.waitForTimeout(300);
   await save(await card.screenshot(), 'og-contact.png');
+  await card.context().close();
+}
+
+// The warp scale: a phone screenshot partway through the race to the galactic core, and a link preview with the race.
+if (!only || only === 'warp') {
+  const page = await open({ width: 390, height: 844 }, 2);
+  await page.goto(base + 'warp.html#core');
+  await page.waitForFunction(() => window.warpScale);
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => warpScale.freeze(warpScale.trip.clock.when(300)));
+  await page.waitForTimeout(300);
+  await save(await page.screenshot(), 'docs/phone-scale.png');
+  await page.context().close();
+
+  const wide = await open({ width: 560, height: 900 }, 2);
+  await wide.goto(base + 'warp.html#core');
+  await wide.waitForFunction(() => window.warpScale);
+  await wide.evaluate(() => document.fonts.ready);
+  await wide.evaluate(() => warpScale.freeze(warpScale.trip.clock.when(300)));
+  await wide.waitForTimeout(300);
+  const [shot, aspect] = await wide.evaluate(() => { const c = document.getElementById('race'); return [c.toDataURL(), c.height / c.width]; });
+  await wide.context().close();
+
+  const font = async f => (await readFile(join(root, 'fonts', f))).toString('base64');
+  const card = await open({ width: 1200, height: 630 }, 1);
+  await card.setContent(`<!doctype html><style>
+    @font-face { font-family: C; font-weight: 600; src: url(data:font/woff2;base64,${await font('chakra-petch-600.woff2')}); }
+    @font-face { font-family: P; src: url(data:font/woff2;base64,${await font('ibm-plex-sans.woff2')}); }
+    body { margin: 0; width: 1200px; height: 630px; background: radial-gradient(ellipse at 20% 0%, #2a2148, #05070d 65%); color: #e8edf6; overflow: hidden; position: relative; }
+    .text { position: absolute; left: 72px; top: 0; bottom: 0; width: 470px; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
+    .eyebrow { font: 600 22px C; letter-spacing: .18em; text-transform: uppercase; color: #ffb54a; }
+    h1 { margin: 10px 0 18px; font: 600 80px/1 C; letter-spacing: .03em; }
+    p { margin: 0; font: 32px/1.3 P; color: #cdd5e3; }
+    .meta { margin-top: 30px; font: 600 22px C; letter-spacing: .08em; color: #c9a2ff; }
+    .view { position: absolute; right: 48px; top: 50%; transform: translateY(-50%); width: ${Math.round(480 / aspect)}px; height: 480px; border-radius: 24px; border: 1px solid rgba(140,180,255,.32); background: url(${shot}) center / 100% 100%; }
+  </style>
+  <div class="view"></div>
+  <div class="text"><div class="eyebrow">Engage · Navigation</div><h1>Warp scale</h1><p>Earth to the galactic core at warp 1, 5 and 9.975.</p><div class="meta">From the Moon to Andromeda</div></div>`);
+  await card.waitForTimeout(300);
+  await save(await card.screenshot(), 'og-warp.png');
   await card.context().close();
 }
 

@@ -429,6 +429,7 @@ assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose 
     localStorage.setItem('engage.tonight.v1', JSON.stringify({ sky: 'bogus', place: { name: 'Nowhere' } }));
     localStorage.setItem('engage.xeno.v1', JSON.stringify({ jars: [null, { id: 'Z', seed: 1 }, 'x'] }));
     localStorage.setItem('engage.contact.v1', JSON.stringify({ runs: [null, 3, { title: 7 }] }));
+    localStorage.setItem('engage.warp.v1', JSON.stringify({ place: 7, warp: 'fast' }));
   });
   const p = await junk.newPage();
   const broke = [];
@@ -438,7 +439,7 @@ assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose 
   assert.equal(await p.locator('#where').innerText(), 'Earth orbit');
   await p.click('#open-log');
   assert.match(await p.locator('#stats').innerText(), /Nothing logged yet/);
-  for (const [file, hook] of [['maru.html', 'maru'], ['missions.html', 'missions'], ['xeno.html', 'xeno'], ['contact.html', 'contact'], ['tonight.html', 'tonight']]) {
+  for (const [file, hook] of [['maru.html', 'maru'], ['missions.html', 'missions'], ['xeno.html', 'xeno'], ['contact.html', 'contact'], ['warp.html', 'warpScale'], ['tonight.html', 'tonight']]) {
     await p.goto(base + file);
     await p.waitForFunction(name => window[name], hook);
   }
@@ -684,6 +685,40 @@ await page.waitForFunction(() => window.contact);
 assert.equal(await page.locator('#runs li').count(), 1, 'the record was not kept');
 await page.goto(base);
 await bridgeReady();
+
+// The warp scale: reached from under the warp slider with the helm's warp factor, a race to the galactic core run to
+// the end, another place picked from the ladder, and a link back to the bridge with a course set.
+await page.evaluate(() => { const w = document.getElementById('warp'); w.value = 7.5; w.dispatchEvent(new Event('input')); });
+await Promise.all([page.waitForNavigation(), page.click('#open-scale')]);
+await page.waitForFunction(() => window.warpScale);
+assert.equal(await page.inputValue('#custom-warp'), '7.5', 'the bridge’s warp factor did not come along');
+assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'the warp scale scrolls sideways on a phone');
+assert.equal(await page.evaluate(() => warpScale.place), 'core');
+assert.match(await text('#place'), /3 years 11 months/, 'warp 9.975 to the galactic core is not about four years');
+await page.click('#go');
+assert.equal(await text('#go'), 'SKIP AHEAD');
+await page.waitForFunction(() => document.querySelectorAll('#times tr.there').length >= 1, null, { timeout: 10000 });
+const raceLit = await page.evaluate(() => {
+  const c = document.getElementById('race'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  const seen = new Set(); for (let i = 0; i < d.length; i += 40) seen.add((d[i] >> 4) * 256 + (d[i + 1] >> 4) * 16 + (d[i + 2] >> 4));
+  return seen.size;
+});
+assert.ok(raceLit > 30, 'the race is not drawn');
+await page.waitForFunction(() => warpScale.done, null, { timeout: 20000 });
+assert.equal(await page.locator('#times tr.there').count(), 5, 'not every ship got there');
+assert.match(await text('#race-note'), /Voyager 1 would take/);
+await page.locator('.rung[data-id="vulcan"]').click();
+assert.equal(await page.evaluate(() => [warpScale.place, warpScale.running, warpScale.done].join()), 'vulcan,false,false');
+assert.match(page.url(), /#vulcan$/);
+await page.click('#go');
+await page.click('#go'); // skip ahead
+assert.equal(await page.evaluate(() => warpScale.done), true, 'skip ahead did not finish the race');
+await page.reload();
+await page.waitForFunction(() => window.warpScale);
+assert.equal(await page.evaluate(() => warpScale.place), 'vulcan', 'the place was not remembered');
+await Promise.all([page.waitForNavigation(), page.click('#place .to-file')]);
+await bridgeReady();
+assert.equal(await text('#target-name'), '40 Eridani', 'Set course from the warp scale did not choose Vulcan’s sun');
 
 // With reduced motion, warp doesn't flash the screen white and the log doesn't animate in.
 await page.emulateMedia({ reducedMotion: 'reduce' });
