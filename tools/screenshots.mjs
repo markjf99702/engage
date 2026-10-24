@@ -1,5 +1,5 @@
-// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png, og-tonight.png):  node tools/screenshots.mjs
-// Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, missions or tonight)
+// Renders the README screenshots (docs/*.png) and the link previews (og.png, og-survey.png, og-maru.png, og-missions.png, og-tonight.png, og-xeno.png):  node tools/screenshots.mjs
+// Only the planetary survey's, the Kobayashi Maru's or long missions':  node tools/screenshots.mjs survey  (or maru, missions, tonight or xeno)
 // Math.random is seeded, so the warp streaks come out the same each time. Needs Playwright, and upng-js from `npm install`.
 import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
@@ -267,6 +267,49 @@ if (!only || only === 'tonight') {
   <div class="text"><div class="eyebrow">Engage · Tonight’s sky</div><h1>Starfleet style</h1><p>Point your phone at the sky and see where Vulcan is tonight.</p><div class="meta">Every star tagged where it really is</div></div>`);
   await card.waitForTimeout(300);
   await save(await card.screenshot(), 'og-tonight.png');
+  await card.context().close();
+}
+
+// The xenobiology lab: a phone screenshot, and a link preview with three creatures in their tanks.
+if (!only || only === 'xeno') {
+  const page = await open({ width: 390, height: 844 }, 2);
+  await page.emulateMedia({ reducedMotion: 'reduce' }); // grown at once, standing still
+  await page.goto(base + 'xeno.html#H-37');
+  await page.waitForFunction(() => window.xeno?.current);
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(800);
+  await save(await page.screenshot(), 'docs/phone-xeno.png');
+  const tanks = await page.evaluate(async () => {
+    const { grow } = await import('./js/xeno-gen.js');
+    const { drawScene } = await import('./js/xeno-art.js');
+    return [['H', 37], ['J', 1], ['P', 74]].map(([id, seed]) => {
+      const c = document.createElement('canvas'); c.width = 800; c.height = 600;
+      const g = c.getContext('2d'); g.scale(2, 2);
+      drawScene(g, grow(id, seed), 400, 300, 1.3, 1);
+      return c.toDataURL();
+    });
+  });
+  await page.context().close();
+
+  const font = async f => (await readFile(join(root, 'fonts', f))).toString('base64');
+  const card = await open({ width: 1200, height: 630 }, 1);
+  await card.setContent(`<!doctype html><style>
+    @font-face { font-family: C; font-weight: 600; src: url(data:font/woff2;base64,${await font('chakra-petch-600.woff2')}); }
+    @font-face { font-family: P; src: url(data:font/woff2;base64,${await font('ibm-plex-sans.woff2')}); }
+    body { margin: 0; width: 1200px; height: 630px; background: radial-gradient(ellipse at 75% 50%, #111b33, #05070d 70%); color: #e8edf6; overflow: hidden; position: relative; }
+    .text { position: absolute; left: 72px; top: 0; bottom: 0; width: 500px; display: flex; flex-direction: column; justify-content: center; z-index: 1; }
+    .eyebrow { font: 600 22px C; letter-spacing: .18em; text-transform: uppercase; color: #6fe3a4; }
+    h1 { margin: 10px 0 18px; font: 600 76px/1 C; letter-spacing: .03em; }
+    p { margin: 0; font: 32px/1.3 P; color: #cdd5e3; }
+    .meta { margin-top: 30px; font: 600 22px C; letter-spacing: .08em; color: #ffb54a; }
+    img { position: absolute; border-radius: 22px; border: 2px solid rgba(140,180,255,.32); box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+  </style>
+  <div class="text"><div class="eyebrow">Engage · Science station</div><h1>Xenobiology lab</h1><p>Pick a planet class and grow something that could live there.</p><div class="meta">Shaped by gravity, air, light and heat</div></div>
+  <img src="${tanks[1]}" style="left:610px; top:40px; width:340px">
+  <img src="${tanks[2]}" style="left:890px; top:110px; width:290px">
+  <img src="${tanks[0]}" style="left:670px; top:320px; width:380px">`);
+  await card.waitForTimeout(300);
+  await save(await card.screenshot(), 'og-xeno.png');
   await card.context().close();
 }
 

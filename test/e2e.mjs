@@ -427,6 +427,7 @@ assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose 
     localStorage.setItem('engage.maru.v1', JSON.stringify({ runs: null }));
     localStorage.setItem('engage.missions.v1', JSON.stringify({ hails: null }));
     localStorage.setItem('engage.tonight.v1', JSON.stringify({ sky: 'bogus', place: { name: 'Nowhere' } }));
+    localStorage.setItem('engage.xeno.v1', JSON.stringify({ jars: [null, { id: 'Z', seed: 1 }, 'x'] }));
   });
   const p = await junk.newPage();
   const broke = [];
@@ -436,7 +437,7 @@ assert.equal(await text('#target-name'), 'Ross 248', 'set course did not choose 
   assert.equal(await p.locator('#where').innerText(), 'Earth orbit');
   await p.click('#open-log');
   assert.match(await p.locator('#stats').innerText(), /Nothing logged yet/);
-  for (const [file, hook] of [['maru.html', 'maru'], ['missions.html', 'missions'], ['tonight.html', 'tonight']]) {
+  for (const [file, hook] of [['maru.html', 'maru'], ['missions.html', 'missions'], ['xeno.html', 'xeno'], ['tonight.html', 'tonight']]) {
     await p.goto(base + file);
     await p.waitForFunction(name => window[name], hook);
   }
@@ -596,6 +597,44 @@ await Promise.all([page.waitForNavigation(), page.click('#card-course')]);
 await bridgeReady();
 assert.equal(await text('#target-name'), '40 Eridani', 'set course did not choose Vulcan’s sun');
 
+await page.goto(base);
+await bridgeReady();
+
+// The xenobiology lab: reached from the bridge, a creature grown for a class, kept in a jar, and reached from a survey file.
+await Promise.all([page.waitForNavigation(), page.click('#open-xeno')]);
+await page.waitForFunction(() => window.xeno?.current);
+assert.match(await text('#specimen .eyebrow'), /Class M/i);
+assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'the lab scrolls sideways on a phone');
+await page.getByRole('button', { name: 'Class L: Forested, no animals' }).click();
+assert.match(new URL(page.url()).hash, /^#L-\d+$/);
+assert.match(await text('#specimen'), /grew a plant/);
+const firstL = await page.evaluate(() => xeno.current.seed);
+await page.click('#again');
+assert.notEqual(await page.evaluate(() => xeno.current.seed), firstL, 'growing another grew the same one');
+await page.evaluate(() => xeno.show('lava-world', 7));
+assert.match(await text('#refs'), /Horta/);
+assert.equal(await page.locator('#specimen .notes li').count(), 4);
+await page.waitForTimeout(1600); // it grows in
+const tankLit = await page.evaluate(() => {
+  const c = document.getElementById('tank'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+  const seen = new Set(); for (let i = 0; i < d.length; i += 40) seen.add((d[i] >> 4) * 256 + (d[i + 1] >> 4) * 16 + (d[i + 2] >> 4));
+  return seen.size;
+});
+assert.ok(tankLit > 40, 'the tank is not drawn');
+await page.click('#keep');
+assert.equal(await text('#keep'), 'IN A JAR');
+assert.equal(await page.locator('#jars .jar').count(), 1);
+await page.reload();
+await page.waitForFunction(() => window.xeno?.current);
+assert.deepEqual(await page.evaluate(() => [xeno.current.classId, xeno.current.seed]), ['lava-world', 7], 'the link did not bring back the same creature');
+assert.equal(await page.locator('#jars .jar').count(), 1, 'the jar was not kept');
+await page.click('#jars .jar-drop');
+assert.equal(await shown('#jars-wrap'), false);
+await page.goto(base + 'survey.html#O');
+await page.waitForFunction(() => window.survey);
+await Promise.all([page.waitForNavigation(), page.locator('#file a', { hasText: 'Grow a creature' }).click()]);
+await page.waitForFunction(() => window.xeno?.current);
+assert.equal(await page.evaluate(() => xeno.current.classId), 'O');
 await page.goto(base);
 await bridgeReady();
 

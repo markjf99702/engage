@@ -1,5 +1,5 @@
 // Bundles the whole app into one HTML file for the Artifact viewer:  node tools/build-artifact.mjs
-// Writes dist/engage.html, dist/survey.html, dist/maru.html, dist/missions.html and dist/tonight.html: styles, fonts, scripts, star data and the Milky Way all inline, with no document wrapper
+// Writes dist/engage.html, dist/survey.html, dist/maru.html, dist/missions.html, dist/tonight.html and dist/xeno.html: styles, fonts, scripts, star data and the Milky Way all inline, with no document wrapper
 // (the viewer adds its own). The site itself still runs from the repo as-is; this is only for the playable copy.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
@@ -61,7 +61,8 @@ const title = html.match(/<title>.*?<\/title>/)[0];
 const body = pageBody(html).replaceAll('href="survey.html"', `href="${LIVE}survey.html" target="_blank" rel="noopener"`)
   .replaceAll('href="maru.html"', `href="${LIVE}maru.html" target="_blank" rel="noopener"`)
   .replaceAll('href="missions.html"', `href="${LIVE}missions.html" target="_blank" rel="noopener"`)
-  .replaceAll('href="tonight.html"', `href="${LIVE}tonight.html" target="_blank" rel="noopener"`);
+  .replaceAll('href="tonight.html"', `href="${LIVE}tonight.html" target="_blank" rel="noopener"`)
+  .replaceAll('href="xeno.html"', `href="${LIVE}xeno.html" target="_blank" rel="noopener"`);
 const out = `${title}
 <meta name="theme-color" content="#05070d">
 <style>
@@ -163,3 +164,24 @@ ${tonightJs}
 `;
 await writeFile(join(root, 'dist/tonight.html'), tonightOut);
 console.log(`dist/tonight.html: ${(tonightOut.length / 1024 / 1024).toFixed(2)} MB`);
+
+// The xenobiology lab, as its own single file. Links to the bridge and the survey go to the live site.
+const xenoHtml = await read('xeno.html');
+const xenoJs = await bundle(['classes', 'planet-art', 'xeno-gen', 'xeno-art', 'species', 'xeno'], (name, src) =>
+  src.replace("const BRIDGE = './';", `const BRIDGE = '${LIVE}';`));
+const xenoOut = `<title>Xenobiology lab</title>
+<meta name="theme-color" content="#05070d">
+<style>
+${css}
+${await read('css/survey.css')}
+${await read('css/xeno.css')}
+</style>
+${pageBody(xenoHtml).replaceAll('href="./"', `href="${LIVE}" target="_blank" rel="noopener"`)}
+<script type="module">
+const __m = {};
+document.body.classList.add('survey', 'xeno');
+${xenoJs}
+</script>
+`;
+await writeFile(join(root, 'dist/xeno.html'), xenoOut);
+console.log(`dist/xeno.html: ${(xenoOut.length / 1024).toFixed(0)} KB`);

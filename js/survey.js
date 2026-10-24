@@ -5,6 +5,7 @@ import { Globe, paint, paintSoon } from './planet-art.js';
 const KEY = 'engage.survey.v1';
 // Where Engage itself is. The single-file copy points this at the live site.
 const BRIDGE = './';
+const XENO = `${BRIDGE}xeno.html`;
 const AWAY = BRIDGE.startsWith('http') ? ' target="_blank" rel="noopener"' : '';
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -135,6 +136,8 @@ function fileHtml(c) {
     ${c.science ? `<p>${esc(c.science)}</p>` : ''}
     <h3>${c.candidate ? 'Real candidates' : 'Out there'}</h3>
     ${worlds ? `<ul class="worlds">${worlds}</ul>` : '<p class="none">No real planet known to fit yet.</p>'}
+    <h3>Life</h3>
+    <a class="fly" href="${XENO}#${esc(c.id)}"${AWAY}>Grow a creature for ${esc(label(c))} <span aria-hidden="true">→</span></a>
   `;
 }
 
